@@ -26,24 +26,43 @@ var Player = {
 		player.playerTypeInfo = playerTypeInfo;
 
 		// --------------- initialize parameters ----------------------
-		// player data
-		player.maxLife = playerTypeInfo.maxLife;
-		player.life = player.maxLife;
+		// alive flag
 		player.isAlive = true;
+
 		// facing direction
+		player.initDirection = config.playerInitFacingDir;
 		player.direction = config.playerInitFacingDir;
 
+		// player data
+		// life
+		player.maxLife = playerTypeInfo.maxLife;
+		player.life = player.maxLife;
+		
+		// battle
+		player.attackDuration = (playerTypeInfo.attackFrame+1) * 1000 / 24;
+		player.onhitDuration = (playerTypeInfo.onhitFrame+1) * 1000 / 24;
+
+		// physics param
 		player.moveForceX = playerTypeInfo.moveForceX;
 		player.moveForceY = playerTypeInfo.moveForceY;
 		player.maxVelocityX = playerTypeInfo.maxVelocityX;
 		player.maxVelocityY = playerTypeInfo.maxVelocityY;
 
-		// setup sprite
-		var sprite = game.add.sprite(x,y,playerTypeInfo.spriteName);
-		player.sprite = sprite;
-		sprite.anchor.set(0.5);
-
+		// misc
+		player.spriteName = playerTypeInfo.spriteName;
+		player.spriteScale = config.playerSpriteScale;
+		player.offsetX = playerTypeInfo.offsetX;
+		player.offsetY = playerTypeInfo.offsetY;
+		player.bulletType = playerTypeInfo.bulletType;
 		
+		// setup sprite
+		console.log("spriteName: " + player.spriteName);
+		var sprite = characterLoader.createCharacterSprite(x,y,player.spriteName);
+		player.sprite = sprite;
+
+		sprite.scale.set(player.spriteScale);
+		sprite.anchor.set(playerTypeInfo.anchorX, playerTypeInfo.anchorY);
+
 		// setup physics
 		if(isLocalPlayer){			
 			// enable physics for localPlayer
@@ -54,6 +73,8 @@ var Player = {
 			sprite.body.drag.setTo(playerTypeInfo.drag);
 			sprite.body.collideWorldBounds = true;
 			sprite.body.immovable = false;
+
+
 		}else{
 			// add to collision group
 			Game.nonLocalPlayerGroup.add(sprite);
@@ -62,20 +83,42 @@ var Player = {
 			sprite.body.immovable = true;
 		}
 
+		// setup hitBox	
+		if(playerTypeInfo.useCustomHitBox){
+			sprite.body.setSize(playerTypeInfo.hitBoxWidth, playerTypeInfo.hitBoxHeight, 
+				playerTypeInfo.hitBoxOfffsetX, playerTypeInfo.hitBoxOfffsetY);
+		}
+
+
 		// position synchronizer
 		player.posSync = 
 			networking.SpritePosSynchronizer.createNew(
 				player.sprite);
 
+		// player state
+		player.playerfsm = PlayerFSM.createNew(player);
+		player.playerfsm.init();
+
 		// getters
-		Object.defineProperty(player, "x", {get: function() { return this.sprite.x; }});
-		Object.defineProperty(player, "y", {get: function() { return this.sprite.y; }});
+		Object.defineProperty(player, "x", {
+			get: function() { return this.sprite.x; },
+			set: function(x) { this.sprite.x = x; }
+		});
+		Object.defineProperty(player, "y", {
+			get: function() { return this.sprite.y; },
+			set: function(y){ this.sprite.y = y;}
+		});
 		Object.defineProperty(player, "body", {get: function() { return this.sprite.body; }});
 
 
 // --------------------------------------------
 // Operations
 // --------------------------------------------
+		// make the player sprite face the right direction
+		player.face = function(){			
+			player.sprite.scale.x = player.spriteScale * player.direction * player.initDirection;
+		}
+
 		// move for one step. Corresponds to one touch input.
 		player.moveStep = function(px, py){
 			if(!player.isAlive)
@@ -89,8 +132,12 @@ var Player = {
 			player.sprite.body.velocity = v;
 			
 			// update player direction
-			if(xdir != 0)
+			if(xdir != 0){
 				player.direction = xdir;
+				player.face();
+			}
+
+			player.playerfsm.onStepMove();
 		};
 
 		// fire a bullet based on player status
@@ -100,7 +147,8 @@ var Player = {
 				return;
 
 			if(player.isLocalPlayer){
-				player.createBullet(null, player.x, player.y, 'bullet');
+				player.createBullet(null, player.x, player.y, player.direction, player.bulletType);
+				player.playerfsm.onFire();
 			}
 		};
 
@@ -126,8 +174,10 @@ var Player = {
 				player.die(sourceID);
 			}
 
-			if(player.isLocalPlayer)
+			if(player.isLocalPlayer){
 				player.events.lifeChange.dispatch(player.life);
+				player.playerfsm.onGetHit();
+			}
 		};
 
 		player.die = function(killerID){
@@ -155,12 +205,13 @@ var Player = {
 			console.log('player respawned.');
 			player.isAlive = true;
 			player.life = player.maxLife;
-			player.sprite.x = x;
-			player.sprite.y = y;
+			player.x = x;
+			player.y = y;
 
 			if(player.isLocalPlayer){
 				Game.sendPlayerRespawn(player.id, x, y);
 				player.events.lifeChange.dispatch(player.life);
+				player.playerfsm.onRespawn();
 			}else{
 				player.posSync.reset(x, y);
 			}
@@ -172,6 +223,7 @@ var Player = {
 			networking.registerUpdate(player.netUpdate);
 		};
 
+		
 // --------------------------------------------
 // Bullet management
 // --------------------------------------------
@@ -180,16 +232,12 @@ var Player = {
 
 		// create a bullet with custom parameters.
 		// if local player, informs the server to broadcast
-		player.createBullet = function(bulletID, x, y, spriteName){
-			var bullet = Bullet.createNew(player.id, bulletID);
-			bullet.setSprite(x, y, spriteName);
+		// pass null as bulletID for local players.
+		player.createBullet = function(bulletID, x, y, direction, type){
+			if(!type)
+				type = player.bulletType;
 
-			// apply physics on local player
-			if(player.isLocalPlayer){
-				bullet.setPhysics(player.direction * 100, -50, 50, 0);
-				bullet.setBulletType(false);
-			}
-
+			var bullet = Bullet.createNew(player.id, bulletID, x, y, player.direction, type);
 			bullet.registerNetUpdate();
 			
 			player.bullets[bullet.id] = bullet;
@@ -221,7 +269,7 @@ var Player = {
 // --------------------------------------------
 		player.netUpdate = function(){
 			if(isLocalPlayer)
-				Game.sendPlayerPos(player.x, player.y);
+				Game.sendPlayerPos(player.x, player.y, player.direction);
 		};
 
 		player.update = function(){
@@ -229,6 +277,9 @@ var Player = {
 			if(player.isLocalPlayer){
 				// applies collision
 				var hit = game.physics.arcade.collide(player.sprite, Game.nonLocalPlayerGroup);
+
+				// updates state
+				player.playerfsm.update();
 			}
 			else{
 				// sync pos
@@ -261,11 +312,14 @@ var Player = {
 
 			networking.removeUpdate(player.netUpdate);
 			player.sprite.destroy();
+			player.playerfsm.onRemove();
 		};
 
 		// called when receiving position data from server
-		player.onSyncPosition = function(x, y){
-			player.posSync.onSyncDataReceived(x, y);
+		player.onSyncPosition = function(x, y, direction){
+			player.posSync.onSyncDataReceived(x,y);
+			player.direction = direction;
+			player.face();
 		};
 
 		// called when player respawn timer alerts

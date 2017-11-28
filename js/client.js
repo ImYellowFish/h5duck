@@ -20,8 +20,12 @@ Client.sendClick = function(x, y){
 };
 
 // called when local player wants to upload self position
-Client.sendPosition = function(x, y){
-	Client.socket.emit('uploadPos', {x:x, y:y});
+Client.sendPosition = function(id, x, y, direction){
+	Client.socket.emit('uploadPos', {id:id, x:x, y:y, direction:direction});
+};
+
+Client.sendPlayerState = function(id, state){
+	Client.socket.emit('playerState', {id:id, state:state});
 };
 
 Client.sendDealDamage = function(sourceID, targetID, damage){
@@ -37,8 +41,9 @@ Client.sendPlayerRespawn = function(playerID, x, y){
 }
 
 // ---------- bullet ---------------------------
-Client.sendCreateBullet = function(bulletID, playerID, x, y, type){
-	Client.socket.emit('createBullet', {bulletID:bulletID, playerID:playerID, x:x, y:y, type:type});
+Client.sendCreateBullet = function(bulletID, playerID, x, y, direction, bulletType){
+	Client.socket.emit('createBullet', {bulletID:bulletID, playerID:playerID, 
+		x:x, y:y, direction:direction, bulletType:bulletType});
 }
 
 Client.sendRemoveBullet = function(bulletID, playerID){
@@ -81,7 +86,11 @@ Client.socket.on('move', function(data){
 });
 
 Client.socket.on('syncPos', function(data){
-	Game.syncPlayerPos(data.id, data.x, data.y);
+	Game.syncPlayerPos(data.id, data.x, data.y, data.direction);
+});
+
+Client.socket.on('playerState', function(data){
+	Game.recvPlayerState(data.id, data.state);
 });
 
 Client.socket.on('recvDamage', function(data){

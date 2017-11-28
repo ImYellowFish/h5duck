@@ -12,19 +12,34 @@ var Bullet = {
 	},
 
 // --------------------------------------------
-// Definition
+// Properties
 // --------------------------------------------
-	createNew: function(playerID, bulletID){
+	createNew: function(playerID, bulletID, x, y, direction, type){
 		var bullet = {};
+		// basic info
 		bullet.id = bulletID;
 		bullet.playerID = playerID;
 		bullet.player = Game.playerMap[playerID];
 		bullet.isLocalBullet = bullet.player.isLocalPlayer;
-		bullet.damage = config.bulletDamage;
-
 		if(bullet.isLocalBullet){
 			bullet.id = Bullet.getNewBulletID(playerID);
 		}
+
+		bullet.direction = direction;
+		
+		// type info
+		var bulletTypeInfo = config.bulletType[type];
+		if(!bulletTypeInfo){
+			type = 'default';
+			bulletTypeInfo = config.bulletType.default;
+		}
+		bullet.type = type;
+		bullet.bulletTypeInfo = bulletTypeInfo;
+
+		// bullet parameters
+		bullet.spriteName = bulletTypeInfo.spriteName;
+		bullet.damage = bulletTypeInfo.damage;
+		bullet.penetrate = bulletTypeInfo.penetrate;
 
 		// getters
 		Object.defineProperty(bullet, "x", {get: function() { return this.sprite.x; }});
@@ -34,23 +49,6 @@ var Bullet = {
 // --------------------------------------------
 // Initialization API
 // --------------------------------------------
-		// create a sprite for this bullet
-		bullet.setSprite = function(x, y, resName){
-			// console.log("create bullet: " + bullet.id);
-			bullet.sprite = game.add.sprite(x,y,resName);
-			bullet.sprite.anchor.set(0.5);
-
-			if(bullet.isLocalBullet){
-				bullet.sprite.checkWorldBounds = true;
-				bullet.sprite.events.onOutOfBounds.add(bullet.onOutOfBounds, this);
-			}
-
-			// setup bullet pos synchronizer
-			bullet.posSync = 
-				networking.SpritePosSynchronizer.createNew(
-					bullet.sprite);
-		};
-
 		// create physics for this bullet. called on local bullet only.
 		bullet.setPhysics = function(vx, vy, gravity_y, drag){
 			if(!bullet.sprite){
@@ -63,11 +61,6 @@ var Bullet = {
 			bullet.sprite.body.velocity.y = vy;
 			bullet.sprite.body.gravity.y = gravity_y;
 			bullet.sprite.body.drag = drag;
-		};
-
-		// defines the bullet types.
-		bullet.setBulletType = function(penetrate){
-			bullet.penetrate = penetrate;
 		};
 
 		// add extra callback when bullet hits target.
@@ -156,8 +149,34 @@ var Bullet = {
 		bullet.onSyncStatus = function(x, y){
 			bullet.posSync.onSyncDataReceived(x, y);
 		}
-		
 
+
+// --------------------------------------------
+// Initialization
+// --------------------------------------------
+		// setup sprite		
+		bullet.sprite = game.add.sprite(x,y,bullet.spriteName);
+		bullet.sprite.anchor.set(0.5);		
+
+		// setup bullet pos synchronizer
+		bullet.posSync = 
+			networking.SpritePosSynchronizer.createNew(
+				bullet.sprite);
+
+		// for local bullet, destroy the bullet if out of bound.
+		if(bullet.isLocalBullet){
+			bullet.sprite.checkWorldBounds = true;
+			bullet.sprite.events.onOutOfBounds.add(bullet.onOutOfBounds, this);
+		}
+		
+		// for local bullet, setup physics
+		if(bullet.isLocalBullet){
+			bullet.setPhysics(
+				bulletTypeInfo.velocityX * bullet.direction, 
+				bulletTypeInfo.velocityY, 
+				bulletTypeInfo.gravity, 
+				bulletTypeInfo.drag);
+		}
 		return bullet;
 	}
 }

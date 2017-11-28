@@ -3,7 +3,7 @@ var UI = {};
 UI.ready = false;
 
 UI.preload = function(){
-	game.load.spritesheet('dirbutton', 'assets/sprites/dirbutton.png', 32, 32);
+	game.load.spritesheet('dirbutton', 'assets/sprites/old/dirbutton.png', 32, 32);
 }
 
 UI.create = function(){

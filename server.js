@@ -35,6 +35,7 @@ io.on('connection', function(socket){
 			playerType: data.playerType,
 			x: randomInt(100, 400),
 			y: randomInt(100, 400),
+			state: "idle",
 		};
 		playerIDSocketMap[socket.player.id] = socket;
 		
@@ -61,7 +62,12 @@ io.on('connection', function(socket){
 		socket.on('uploadPos', function(data){
 			socket.player.x = data.x;
 			socket.player.y = data.y;
-			socket.broadcast.emit('syncPos', {id: socket.player.id, x:data.x, y:data.y});
+			socket.broadcast.emit('syncPos', data);
+		});
+
+		socket.on('playerState', function(data){
+			socket.player.state = data.state;
+			socket.broadcast.emit('playerState', data);
 		});
 
 		// called when some player deals damage to another

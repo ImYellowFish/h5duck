@@ -1,7 +1,7 @@
 // Network utility
 var networking = {};
 
-networking.networkFPS = 5;
+networking.networkFPS = 20;
 networking.updateInterval = 60 / networking.networkFPS;
 networking.updaters = [];
 networking.ready = false;

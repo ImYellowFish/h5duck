@@ -14,9 +14,16 @@ Game.init = function(){
 Game.preload = function(){
 	game.load.tilemap('map', 'assets/map/example_map.json', null, Phaser.Tilemap.TILED_JSON);
 	game.load.spritesheet('tileset', 'assets/map/tilesheet.png', 32, 32);
-	game.load.image('default_player', 'assets/sprites/sprite.png');
-	game.load.image('bullet', 'assets/sprites/diamond.png');
-	game.load.spritesheet('baddie', 'assets/sprites/baddie.png', 32, 32);
+	game.load.spritesheet('baddie', 'assets/sprites/old/baddie.png', 32, 32);
+	game.load.image('default_player', 'assets/sprites/old/sprite.png');
+	game.load.image('default_bullet', 'assets/sprites/old/diamond.png');
+	game.load.image('aid', 'assets/sprites/old/firstaid.png');
+
+	// load characters
+	characterLoader.preloadSpriteSheet("black", "black");
+	characterLoader.preloadSpriteSheet("red", "red");
+	characterLoader.preloadSpriteSheet("blue", "blue");
+	characterLoader.preloadSpriteSheet("yellow", "yellow");
 
 	UI.preload();
 }
@@ -46,6 +53,8 @@ Game.create = function(){
 	var playerType = Game.randomPlayerType().key;
 	Client.askNewPlayer(playerType);
 	networking.create();
+
+	// characterLoader.testAnimation();
 }
 
 Game.update = function(){
@@ -61,6 +70,21 @@ Game.update = function(){
 	// network updates
 	networking.update();
 
+}
+
+Game.render = function(){
+	if(config.debugPlayerBody && Game.playerMap){
+		Object.keys(Game.playerMap).forEach(function(key){
+			game.debug.body(Game.playerMap[key].sprite);
+			game.debug.pixel(Game.playerMap[key].sprite.x, Game.playerMap[key].sprite.y, 'rgba(0,0,255,1)', 4);
+			game.debug.pixel(Game.playerMap[key].x, Game.playerMap[key].y, 'rgba(255,0,0,1)', 4);
+			game.debug.spriteBounds(Game.playerMap[key].sprite, 'rgba(255,0,0,1)', false)
+		});
+	}
+
+	if(config.debugPlayerState && Game.localPlayer){
+		game.debug.text(Game.localPlayer.playerfsm.state, 50, 50, 'rgba(0,0,255,1)');
+	}
 }
 
 
@@ -128,18 +152,31 @@ Game.removePlayer = function(id){
 };
 
 // called when local player wants to upload current position
-Game.sendPlayerPos = function(x, y){
-	Client.sendPosition(x, y);
+Game.sendPlayerPos = function(x, y, direction){
+	Client.sendPosition(Game.localPlayerID, x, y, direction);
 }
 
 // called when server informs a player's position
-Game.syncPlayerPos = function(id, x, y){
+Game.syncPlayerPos = function(id, x, y, direction){
 	if(!networking.ready)
 		return;
 
 	var player = Game.playerMap[id];
-	player.onSyncPosition(x, y);
+	player.onSyncPosition(x, y, direction);
 }
+
+
+Game.sendPlayerState = function(state){
+	Client.sendPlayerState(Game.localPlayerID, state);
+};
+
+Game.recvPlayerState = function(id, state){
+	if(!networking.ready)
+		return;
+	var player = Game.playerMap[id];
+	if(player)
+		player.playerfsm.goto(state, true);
+};
 
 
 Game.sendDealDamage = function(sourceID, targetID, damage){
@@ -191,7 +228,7 @@ Game.recvPlayerRespawn = function(playerID, x, y){
 
 // called when local player wants to spawn a bullet in server
 Game.sendCreateBullet = function(bullet){
-	Client.sendCreateBullet(bullet.id, bullet.playerID, bullet.x, bullet.y, 0);
+	Client.sendCreateBullet(bullet.id, bullet.playerID, bullet.x, bullet.y, bullet.direction, bullet.type);
 }
 
 // called when server informs that a new bullet is spawned
@@ -200,7 +237,7 @@ Game.recvCreateBullet = function(bulletData){
 		return;
 
 	var player = Game.playerMap[bulletData.playerID];
-	player.createBullet(bulletData.bulletID, bulletData.x, bulletData.y, 'bullet');
+	player.createBullet(bulletData.bulletID, bulletData.x, bulletData.y, bulletData.direction, bulletData.bulletType);
 }
 
 // called when local player wants to despawn a bullet in server
@@ -231,7 +268,7 @@ Game.recvBulletSync = function(bulletData){
 		if(bullet){
 			bullet.onSyncStatus(bulletData.x, bulletData.y);
 		}else{
-			player.createBullet(bulletData.bulletID, bulletData.x, bulletData.y, 'bullet');
+			player.createBullet(bulletData.bulletID, bulletData.x, bulletData.y, bulletData.direction, bulletData.bulletType);
 		}
 	}
 }
