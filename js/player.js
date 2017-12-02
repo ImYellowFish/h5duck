@@ -7,7 +7,7 @@ var Player = {
 // --------------------------------------------
 // Constructor
 // --------------------------------------------
-	createNew : function(id, x, y, isLocalPlayer, type){
+	createNew : function(id, x, y, isLocalPlayer, type, playerName){
 
 // --------------------------------------------
 // Setup
@@ -15,7 +15,8 @@ var Player = {
 		var player = {};
 		player.id = id;
 		player.isLocalPlayer = isLocalPlayer;
-		
+		player.name = playerName;
+
 		// read player typeInfo
 		var playerTypeInfo = config.playerType[type];
 		if(!playerTypeInfo){
@@ -438,14 +439,15 @@ var Player = {
 
 			// check visiblity
 			if(!player.protected){
-				if(player.playerfsm.visible() && player.isAlive){
+				if(player.playerfsm.visible() && player.isAlive && player.isInView){
 					player.sprite.alpha = 1;
 				}else{
 					player.sprite.alpha = 0;
 				}
 			}
 
-			player.sprite.visible = player.isInView;
+			// TODO: optimize bullet collision detection so this can be enabled
+			// player.sprite.visible = player.isInView;
 		};
 
 
@@ -474,6 +476,9 @@ var Player = {
 
 		// called when receiving position data from server
 		player.onSyncPosition = function(x, y, direction, life){
+			if(!player)
+				return;
+
 			// cull sprite if not in view
 			player.isInView = Game.isPosInView(x, y);
 			player.posSync.onSyncDataReceived(x,y);

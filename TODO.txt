@@ -3,3 +3,4 @@
 8. bullet init damage cooldown
 11. buff system
 12. boss system
+13. optimize bullet collision detection

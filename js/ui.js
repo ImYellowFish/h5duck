@@ -3,7 +3,7 @@ var UI = {};
 UI.ready = false;
 
 UI.preload = function(){
-	game.load.atlasJSONHash('ui', 'assets/sprites/ui.png', 'assets/sprites/ui.json');
+	// game.load.atlasJSONHash('ui', 'assets/sprites/ui.png', 'assets/sprites/ui.json');
 }
 
 UI.create = function(){
@@ -33,23 +33,12 @@ UI.create = function(){
 	UI.fireButton.fixedToCamera = true;
 
 	// displays
-	// UI.playerLife = game.add.text(Game.width * 0.1, Game.height * 0.1, 'Life: ', { font: "25px Arial", fill: "#ff0044", align: "center" });
-	// UI.playerLife.fixedToCamera = true;
 	UI.ready = true;
-	
-	Game.localPlayer.events.lifeChange.add(UI.onPlayerLifeChange);
-	UI.onPlayerLifeChange(Game.localPlayer.life);
 }
 
 
 
 // internal UI events
-UI.onPlayerLifeChange = function(newLife){
-	if(UI.ready){
-		UI.playerLife.text = 'Life: ' + newLife;
-	}
-}
-
 UI.onLeftDown = function(){
 	UI.isLeftBtnDown = true;	
 };

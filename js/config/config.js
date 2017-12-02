@@ -127,5 +127,6 @@ var config = {
 	uiLifeBarPlayerSpeed : 4 / 60,
 	uiLifeBarPlayerMgSpeed : 2 / 60,
 	uiLifeBarEnemySpeed : 4 / 60,
+	uiNameTextOffsetY : -80,
 };
 

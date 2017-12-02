@@ -8,8 +8,8 @@ Client.socket = io.connect();
 
 // ---------- login ---------------------------
 // called when local player wants to join the game
-Client.askNewPlayer = function(playerType){
-	Client.socket.emit('newplayer', {playerType:playerType});
+Client.askNewPlayer = function(playerType, playerName){
+	Client.socket.emit('newplayer', {playerType:playerType, playerName:playerName});
 };
 
 
@@ -57,8 +57,9 @@ Client.sendRemoveBullet = function(bulletID, playerID){
 	Client.socket.emit('removeBullet', {bulletID:bulletID, playerID:playerID});
 }
 
-Client.sendBulletSync = function(bulletID, playerID, x, y){
-	Client.socket.emit('bulletSync', {bulletID:bulletID, playerID:playerID, x:x, y:y});
+Client.sendBulletSync = function(bulletID, playerID, x, y, direction, bulletType){
+	Client.socket.emit('bulletSync', {bulletID:bulletID, playerID:playerID, 
+		x:x, y:y, direction:direction, bulletType:bulletType});
 }
 
 
@@ -69,7 +70,7 @@ Client.sendBulletSync = function(bulletID, playerID, x, y){
 
 // ---------- login/logout --------------------
 Client.socket.on('newplayer', function(data){
-	Game.addNewPlayer(data.id, data.x, data.y, false, data.playerType);
+	Game.addNewPlayer(data.id, data.x, data.y, false, data.playerType, data.playerName);
 });
 
 Client.socket.on('allplayers', function(data){
@@ -77,7 +78,8 @@ Client.socket.on('allplayers', function(data){
 	var players = data.players;
 	for(var i = 0; i < players.length; i++){
 		var isLocalPlayer = data.newPlayerID == players[i].id;
-		Game.addNewPlayer(players[i].id, players[i].x, players[i].y, isLocalPlayer, players[i].playerType);
+		Game.addNewPlayer(players[i].id, players[i].x, players[i].y, 
+			isLocalPlayer, players[i].playerType, players[i].playerName);
 	}
 	Game.setNetworkReady();
 });

@@ -10,6 +10,9 @@ var LifeBar = {
 		}
 
 		lifeBar.update = function() {
+			lifeBar.updateTextPos();
+
+			// check lifebar visibility
 			var visible = lifeBar.player.isInView &&
 					lifeBar.player.isAlive && 
 					(lifeBar.player.life < lifeBar.player.maxLife || lifeBar.player.isLocalPlayer);
@@ -20,7 +23,7 @@ var LifeBar = {
 			// update position
 			// lifeBar.updatePos(lifeBar.sprite, lifeBar.initWidth);
 			lifeBar.updatePos(lifeBar.bgSprite, lifeBar.bgSprite.width);
-
+			
 			// update value and display
 			lifeBar.desiredValue = lifeBar.player.life / lifeBar.player.maxLife;
 			lifeBar.value = lifeBar.lerpValue(lifeBar.value, lifeBar.desiredValue, lifeBar.changeSpeed);
@@ -41,6 +44,9 @@ var LifeBar = {
 				lifeBar.mgSprite.destroy();
 			}
 
+			if(lifeBar.nameLabel){
+				lifeBar.nameLabel.destroy();
+			}
 			lifeBar.sprite.destroy();
 		};
 
@@ -55,11 +61,30 @@ var LifeBar = {
 			_sprite.y = player.y + _sprite.height / 2 + config.uiLifeBarOffsetY;
 		}
 
+		lifeBar.updateTextPos = function(){
+			if(lifeBar.nameLabel){
+				lifeBar.nameLabel.visible = lifeBar.player.isInView;
+
+				if(lifeBar.nameLabel.visible){
+					lifeBar.nameLabel.x = lifeBar.player.x + config.uiLifeBarOffsetX;
+					lifeBar.nameLabel.y = player.y + config.uiLifeBarOffsetY * -0.5;
+				}
+			}
+		}
+
 		lifeBar.lerpValue = function(current, desired, speed){
 			if(current > desired){
 				current = Math.max(current - speed, desired);
 			}
 			return current;
+		}
+
+		lifeBar.createPlayerNameLabel = function(){
+			var style = { font: "35px Arial", fill: "#ffffff", align: "center" };
+			var nameLabel = game.add.text(0, 0, lifeBar.player.name, style);
+			nameLabel.anchor.setTo(0.5);
+			
+			return nameLabel;
 		}
 
 		lifeBar.desiredValue = 1;
@@ -81,9 +106,10 @@ var LifeBar = {
 		if(!lifeBar.player.isLocalPlayer){
 			var spriteName = 'hpBarEnemy.png';
 			lifeBar.mgSprite.visible = false;
-			lifeBar.changeSpeed = config.uiLifeBarEnemySpeed;
+			lifeBar.changeSpeed = config.uiLifeBarEnemySpeed;			
 		}
 
+		
 		lifeBar.sprite = game.add.image(0, 0, 'ui', spriteName);
 		lifeBar.sprite.anchor.setTo(0, 1);
 		
@@ -96,6 +122,11 @@ var LifeBar = {
 		lifeBar.mgCropRect = new Phaser.Rectangle(0, 0, lifeBar.sprite.width, lifeBar.sprite.height);
 		lifeBar.sprite.crop(lifeBar.cropRect);
 		lifeBar.mgSprite.crop(lifeBar.mgCropRect);
+
+		if(!lifeBar.player.isLocalPlayer){
+			lifeBar.nameLabel = lifeBar.createPlayerNameLabel();
+			console.log(lifeBar.nameLabel);
+		}
 
 		return lifeBar;
 	}

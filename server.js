@@ -34,6 +34,7 @@ io.on('connection', function(socket){
 		socket.player = {
 			id: server.lastPlayerID++,
 			playerType: data.playerType,
+			playerName: data.playerName,
 			x: randomInt(100, 400),
 			y: randomInt(100, 400),
 			state: "idle",

@@ -4,6 +4,7 @@
 // --------------------------------------------
 var Game = {};
 
+Game.localPlayerName = "unknown";
 Game.width = config.gameWidth * config.gameWindowScale;
 Game.height = config.gameHeight * config.gameWindowScale;
 
@@ -51,7 +52,7 @@ Game.create = function(){
 		playerType = config.debugPlayerType;
 	}
 
-	Client.askNewPlayer(playerType);
+	Client.askNewPlayer(playerType, Game.localPlayerName);
 	networking.create();
 
 	// characterLoader.testAnimation();
@@ -123,8 +124,8 @@ Game.setNetworkReady = function(){
 // ---------- players -------------------------
 
 // called when server commands adding new player
-Game.addNewPlayer = function(id,x,y,isLocalPlayer,playerType){
-	var newPlayer = Player.createNew(id, x, y, isLocalPlayer, playerType);
+Game.addNewPlayer = function(id,x,y,isLocalPlayer,playerType, playerName){
+	var newPlayer = Player.createNew(id, x, y, isLocalPlayer, playerType, playerName);
 	Game.playerMap[id] = newPlayer;
 	newPlayer.registerNetUpdate();
 
@@ -256,7 +257,7 @@ Game.recvRemoveBullet = function(bulletData){
 }
 
 Game.sendBulletSync = function(bullet){
-	Client.sendBulletSync(bullet.id, bullet.playerID, bullet.x, bullet.y);
+	Client.sendBulletSync(bullet.id, bullet.playerID, bullet.x, bullet.y, bullet.direction, bullet.type);
 }
 
 Game.recvBulletSync = function(bulletData){
