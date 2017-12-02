@@ -1,0 +1,276 @@
+var level = {};
+
+level.preload = function () {
+	game.load.pack('level', 'assets/level/pack.json');	
+};
+
+level.create = function () {
+	var _duckbg = game.add.sprite(0, 0, 'duckbg');
+	_duckbg.scale.setTo(0.416875, 0.416875);
+	
+	var _zap2 = game.add.sprite(730, 402, 'zap0');
+	_zap2.scale.setTo(0.2, 0.2);
+	
+	var _zapblock1 = game.add.sprite(763, 392, 'zapblock');
+	_zapblock1.scale.setTo(0.2, 0.2);
+	
+	var _block2 = game.add.sprite(732, 354, 'block2');
+	_block2.scale.setTo(0.2, 0.2);
+	
+	var _block111 = game.add.sprite(699, 354, 'block1');
+	_block111.scale.setTo(0.2, 0.2);
+	
+	var _block11 = game.add.sprite(666, 354, 'block1');
+	_block11.scale.setTo(0.2, 0.2);
+	
+	var _block1 = game.add.sprite(633, 354, 'block1');
+	_block1.scale.setTo(0.2, 0.2);
+	
+	var _zapblock = game.add.sprite(608, 392, 'zapblock');
+	_zapblock.scale.setTo(0.2, 0.2);
+	
+	var _block0 = game.add.sprite(600, 354, 'block0');
+	_block0.scale.setTo(0.2, 0.2);
+	
+	var _zap = game.add.sprite(618, 401, 'zap0');
+	_zap.scale.setTo(0.2, 0.2);
+	
+	var _zap0 = game.add.sprite(653, 400, 'zap1');
+	_zap0.scale.setTo(0.2, 0.2);
+	
+	var _zap1 = game.add.sprite(693, 400, 'zap2');
+	_zap1.scale.setTo(0.2, 0.2);
+	
+	var _zap8 = game.add.sprite(422, 276, 'zap0');
+	_zap8.scale.setTo(0.2, 0.2);
+	
+	var _zapblock4 = game.add.sprite(455, 266, 'zapblock');
+	_zapblock4.scale.setTo(0.2, 0.2);
+	
+	var _block22 = game.add.sprite(424, 228, 'block2');
+	_block22.scale.setTo(0.2, 0.2);
+	
+	var _block1112 = game.add.sprite(391, 228, 'block1');
+	_block1112.scale.setTo(0.2, 0.2);
+	
+	var _block113 = game.add.sprite(358, 228, 'block1');
+	_block113.scale.setTo(0.2, 0.2);
+	
+	var _block13 = game.add.sprite(325, 228, 'block1');
+	_block13.scale.setTo(0.2, 0.2);
+	
+	var _zapblock5 = game.add.sprite(298, 266, 'zapblock');
+	_zapblock5.scale.setTo(0.2, 0.2);
+	
+	var _block02 = game.add.sprite(292, 228, 'block0');
+	_block02.scale.setTo(0.2, 0.2);
+	
+	var _zap9 = game.add.sprite(310, 275, 'zap0');
+	_zap9.scale.setTo(0.2, 0.2);
+	
+	var _zap00 = game.add.sprite(345, 274, 'zap1');
+	_zap00.scale.setTo(0.2, 0.2);
+	
+	var _zap01 = game.add.sprite(385, 274, 'zap2');
+	_zap01.scale.setTo(0.2, 0.2);
+	
+	var _zap02 = game.add.sprite(248, 505, 'zap0');
+	_zap02.scale.setTo(0.2, 0.2);
+	
+	var _zapblock6 = game.add.sprite(281, 495, 'zapblock');
+	_zapblock6.scale.setTo(0.2, 0.2);
+	
+	var _block23 = game.add.sprite(250, 457, 'block2');
+	_block23.scale.setTo(0.2, 0.2);
+	
+	var _block1113 = game.add.sprite(217, 457, 'block1');
+	_block1113.scale.setTo(0.2, 0.2);
+	
+	var _block114 = game.add.sprite(184, 457, 'block1');
+	_block114.scale.setTo(0.2, 0.2);
+	
+	var _block14 = game.add.sprite(151, 457, 'block1');
+	_block14.scale.setTo(0.2, 0.2);
+	
+	var _zapblock7 = game.add.sprite(126, 495, 'zapblock');
+	_zapblock7.scale.setTo(0.2, 0.2);
+	
+	var _block03 = game.add.sprite(118, 457, 'block0');
+	_block03.scale.setTo(0.2, 0.2);
+	
+	var _zap03 = game.add.sprite(136, 504, 'zap0');
+	_zap03.scale.setTo(0.2, 0.2);
+	
+	var _zap04 = game.add.sprite(171, 503, 'zap1');
+	_zap04.scale.setTo(0.2, 0.2);
+	
+	var _zap05 = game.add.sprite(211, 503, 'zap2');
+	_zap05.scale.setTo(0.2, 0.2);
+	
+	var _zap06 = game.add.sprite(1178, 525, 'zap0');
+	_zap06.scale.setTo(0.2, 0.2);
+	
+	var _zapblock8 = game.add.sprite(1211, 515, 'zapblock');
+	_zapblock8.scale.setTo(0.2, 0.2);
+	
+	var _block24 = game.add.sprite(1180, 477, 'block2');
+	_block24.scale.setTo(0.2, 0.2);
+	
+	var _block1114 = game.add.sprite(1147, 477, 'block1');
+	_block1114.scale.setTo(0.2, 0.2);
+	
+	var _block115 = game.add.sprite(1114, 477, 'block1');
+	_block115.scale.setTo(0.2, 0.2);
+	
+	var _block15 = game.add.sprite(1081, 477, 'block1');
+	_block15.scale.setTo(0.2, 0.2);
+	
+	var _zapblock9 = game.add.sprite(1056, 515, 'zapblock');
+	_zapblock9.scale.setTo(0.2, 0.2);
+	
+	var _block04 = game.add.sprite(1048, 477, 'block0');
+	_block04.scale.setTo(0.2, 0.2);
+	
+	var _zap07 = game.add.sprite(1066, 524, 'zap0');
+	_zap07.scale.setTo(0.2, 0.2);
+	
+	var _zap08 = game.add.sprite(1101, 523, 'zap1');
+	_zap08.scale.setTo(0.2, 0.2);
+	
+	var _zap09 = game.add.sprite(1141, 523, 'zap2');
+	_zap09.scale.setTo(0.2, 0.2);
+	
+	var _zapblock10 = game.add.sprite(-1, 0, 'zapblock');
+	_zapblock10.scale.setTo(0.6, 0.6);
+	
+	var _zap10 = game.add.sprite(23, 3, 'zap0');
+	_zap10.scale.setTo(0.8, 0.8);
+	
+	var _zap11 = game.add.sprite(181, 3, 'zap0');
+	_zap11.scale.setTo(0.8, 0.8);
+	
+	var _zap12 = game.add.sprite(341, 2, 'zap0');
+	_zap12.scale.setTo(0.8, 0.8);
+	
+	var _zap13 = game.add.sprite(500, 1, 'zap0');
+	_zap13.scale.setTo(0.8, 0.8);
+	
+	var _zap14 = game.add.sprite(660, 0, 'zap0');
+	_zap14.scale.setTo(0.8, 0.8);
+	
+	var _zap18 = game.add.sprite(817, 0, 'zap0');
+	_zap18.scale.setTo(0.8, 0.8);
+	
+	var _zap19 = game.add.sprite(1135, 1, 'zap0');
+	_zap19.scale.setTo(0.8, 0.8);
+	
+	var _zap20 = game.add.sprite(976, 0, 'zap0');
+	_zap20.scale.setTo(0.8, 0.8);
+	
+	var _zapblock11 = game.add.sprite(1289, 1, 'zapblock');
+	_zapblock11.scale.setTo(0.6, 0.6);
+	
+	var _group = game.add.group();
+	_group.position.setTo(10, 12);
+	
+	var _zap4 = game.add.sprite(1005, 280, 'zap0', null, _group);
+	_zap4.scale.setTo(0.2, 0.2);
+	
+	var _zapblock2 = game.add.sprite(1038, 270, 'zapblock', null, _group);
+	_zapblock2.scale.setTo(0.2, 0.2);
+	
+	var _block21 = game.add.sprite(1007, 232, 'block2', null, _group);
+	_block21.scale.setTo(0.2, 0.2);
+	
+	var _block1111 = game.add.sprite(974, 232, 'block1', null, _group);
+	_block1111.scale.setTo(0.2, 0.2);
+	
+	var _block112 = game.add.sprite(941, 232, 'block1', null, _group);
+	_block112.scale.setTo(0.2, 0.2);
+	
+	var _block12 = game.add.sprite(908, 232, 'block1', null, _group);
+	_block12.scale.setTo(0.2, 0.2);
+	
+	var _zapblock3 = game.add.sprite(883, 270, 'zapblock', null, _group);
+	_zapblock3.scale.setTo(0.2, 0.2);
+	
+	var _block01 = game.add.sprite(875, 232, 'block0', null, _group);
+	_block01.scale.setTo(0.2, 0.2);
+	
+	var _zap5 = game.add.sprite(893, 279, 'zap0', null, _group);
+	_zap5.scale.setTo(0.2, 0.2);
+	
+	var _zap6 = game.add.sprite(928, 278, 'zap1', null, _group);
+	_zap6.scale.setTo(0.2, 0.2);
+	
+	var _zap7 = game.add.sprite(968, 278, 'zap2', null, _group);
+	_zap7.scale.setTo(0.2, 0.2);
+	
+	var _group1 = game.add.group();
+	_group1.position.setTo(0, -1);
+	
+	var _block231 = game.add.sprite(281, 761, 'block2', null, _group1);
+	_block231.scale.setTo(0.2, 0.2);
+	
+	var _block111317 = game.add.sprite(250, 761, 'block1', null, _group1);
+	_block111317.scale.setTo(0.2, 0.2);
+	
+	var _block111316 = game.add.sprite(219, 761, 'block1', null, _group1);
+	_block111316.scale.setTo(0.2, 0.2);
+	
+	var _block111315 = game.add.sprite(188, 761, 'block1', null, _group1);
+	_block111315.scale.setTo(0.2, 0.2);
+	
+	var _block111314 = game.add.sprite(157, 761, 'block1', null, _group1);
+	_block111314.scale.setTo(0.2, 0.2);
+	
+	var _block111313 = game.add.sprite(126, 761, 'block1', null, _group1);
+	_block111313.scale.setTo(0.2, 0.2);
+	
+	var _block111312 = game.add.sprite(94, 761, 'block1', null, _group1);
+	_block111312.scale.setTo(0.2, 0.2);
+	
+	var _block111311 = game.add.sprite(61, 761, 'block1', null, _group1);
+	_block111311.scale.setTo(0.2, 0.2);
+	
+	var _block11131 = game.add.sprite(28, 761, 'block1', null, _group1);
+	_block11131.scale.setTo(0.2, 0.2);
+	
+	var _block031 = game.add.sprite(-4, 761, 'block0', null, _group1);
+	_block031.scale.setTo(0.2, 0.2);
+	
+	var _group2 = game.add.group();
+	_group2.position.setTo(1006, 0);
+	
+	var _block2311 = game.add.sprite(281, 761, 'block2', null, _group2);
+	_block2311.scale.setTo(0.2, 0.2);
+	
+	var _block1113171 = game.add.sprite(250, 761, 'block1', null, _group2);
+	_block1113171.scale.setTo(0.2, 0.2);
+	
+	var _block1113161 = game.add.sprite(219, 761, 'block1', null, _group2);
+	_block1113161.scale.setTo(0.2, 0.2);
+	
+	var _block1113151 = game.add.sprite(188, 761, 'block1', null, _group2);
+	_block1113151.scale.setTo(0.2, 0.2);
+	
+	var _block1113141 = game.add.sprite(157, 761, 'block1', null, _group2);
+	_block1113141.scale.setTo(0.2, 0.2);
+	
+	var _block1113131 = game.add.sprite(126, 761, 'block1', null, _group2);
+	_block1113131.scale.setTo(0.2, 0.2);
+	
+	var _block1113121 = game.add.sprite(94, 761, 'block1', null, _group2);
+	_block1113121.scale.setTo(0.2, 0.2);
+	
+	var _block1113111 = game.add.sprite(61, 761, 'block1', null, _group2);
+	_block1113111.scale.setTo(0.2, 0.2);
+	
+	var _block111318 = game.add.sprite(28, 761, 'block1', null, _group2);
+	_block111318.scale.setTo(0.2, 0.2);
+	
+	var _block0311 = game.add.sprite(-4, 761, 'block0', null, _group2);
+	_block0311.scale.setTo(0.2, 0.2);
+		
+};
+

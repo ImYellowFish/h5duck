@@ -3,34 +3,44 @@ var UI = {};
 UI.ready = false;
 
 UI.preload = function(){
-	game.load.spritesheet('dirbutton', 'assets/sprites/old/dirbutton.png', 32, 32);
+	game.load.atlasJSONHash('ui', 'assets/sprites/ui.png', 'assets/sprites/ui.json');
 }
 
 UI.create = function(){
+	var btnScale = config.uiButtonScale;
+
 	// buttons
-	UI.leftButton = game.add.button(Game.width * 0.2, Game.height * 0.8, 'dirbutton', null, this, 0, 0, 0);
-	UI.leftButton.scale.setTo(2, 2);
+	UI.leftButton = game.add.button(Game.width * 0.05, Game.height * 0.75, 'ui', null, this, 
+		'left.png', 'left.png', 'leftdown.png', 'left.png');
+	UI.leftButton.scale.setTo(btnScale);
 	UI.leftButton.events.onInputDown.add(UI.onLeftDown, this);
 	UI.leftButton.events.onInputUp.add(UI.onLeftUp, this);
 	UI.leftButton.update = UI.onLeftUpdate;
-	
-	UI.rightButton = game.add.button(Game.width * 0.3, Game.height * 0.8, 'dirbutton', null, this, 1, 1, 1);
-	UI.rightButton.scale.setTo(2, 2);
+	UI.leftButton.fixedToCamera = true;
+
+	UI.rightButton = game.add.button(Game.width * 0.2, Game.height * 0.75, 'ui', null, this, 
+		'right.png', 'right.png', 'rightdown.png', 'right.png');
+	UI.rightButton.scale.setTo(btnScale);
 	UI.rightButton.events.onInputDown.add(UI.onRightDown, this);
 	UI.rightButton.events.onInputUp.add(UI.onRightUp, this);
 	UI.rightButton.update = UI.onRightUpdate;
+	UI.rightButton.fixedToCamera = true;
 
-	UI.fireButton = game.add.button(Game.width * 0.7, Game.height * 0.8, 'dirbutton', UI.onClickFire, this, 0, 0, 0);
-	UI.fireButton.scale.setTo(2, 2);
+	UI.fireButton = game.add.button(Game.width * 0.85, Game.height * 0.85, 'ui', UI.onClickFire, this, 
+		'atk.png', 'atk.png', 'atkdown.png', 'atk.png');
+	UI.fireButton.anchor.setTo(0.5, 0.5);
+	UI.fireButton.scale.setTo(btnScale);
+	UI.fireButton.fixedToCamera = true;
 
 	// displays
-	UI.playerLife = game.add.text(Game.width * 0.1, Game.height * 0.1, 'Life: ', { font: "25px Arial", fill: "#ff0044", align: "center" });
-
+	// UI.playerLife = game.add.text(Game.width * 0.1, Game.height * 0.1, 'Life: ', { font: "25px Arial", fill: "#ff0044", align: "center" });
+	// UI.playerLife.fixedToCamera = true;
 	UI.ready = true;
 	
 	Game.localPlayer.events.lifeChange.add(UI.onPlayerLifeChange);
 	UI.onPlayerLifeChange(Game.localPlayer.life);
 }
+
 
 
 // internal UI events

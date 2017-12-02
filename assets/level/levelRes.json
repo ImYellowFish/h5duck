@@ -1,0 +1,59 @@
+{
+  "level": [
+    {
+      "type": "image",
+      "key": "duckbg",
+      "url": "assets/level/duckbg.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "zapblock",
+      "url": "assets/level/zapblock.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "block0",
+      "url": "assets/level/block0.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "block1",
+      "url": "assets/level/block1.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "block2",
+      "url": "assets/level/block2.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "zap0",
+      "url": "assets/level/zap0.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "zap1",
+      "url": "assets/level/zap1.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "zap2",
+      "url": "assets/level/zap2.png",
+      "overwrite": false
+    }
+  ],
+  "meta": {
+    "generated": "1511877657463",
+    "app": "Phaser Editor",
+    "url": "http://phasereditor.boniatillo.com",
+    "version": "1.0",
+    "copyright": "Arian Fornaris (c) 2015,2016"
+  }
+}

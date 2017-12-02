@@ -1,0 +1,2 @@
+node levelanalysis.js
+pause

@@ -11,39 +11,35 @@ Game.init = function(){
 	game.stage.disableVisibilityChange = true;
 }
 
-Game.preload = function(){
-	game.load.tilemap('map', 'assets/map/example_map.json', null, Phaser.Tilemap.TILED_JSON);
-	game.load.spritesheet('tileset', 'assets/map/tilesheet.png', 32, 32);
-	game.load.spritesheet('baddie', 'assets/sprites/old/baddie.png', 32, 32);
-	game.load.image('default_player', 'assets/sprites/old/sprite.png');
-	game.load.image('default_bullet', 'assets/sprites/old/diamond.png');
-	game.load.image('aid', 'assets/sprites/old/firstaid.png');
-
+Game.preload = function(){	
 	// load characters
 	characterLoader.preloadSpriteSheet("black", "black");
 	characterLoader.preloadSpriteSheet("red", "red");
 	characterLoader.preloadSpriteSheet("blue", "blue");
 	characterLoader.preloadSpriteSheet("yellow", "yellow");
 
+	// load bullets
+	characterLoader.preloadSpriteSheet("bullet", "bullet");
+	effect.preload();
+	levelBuilder.preload();
 	UI.preload();
+
+	if(config.debugFPS)
+		game.time.advancedTiming = true;
+
 }
 
 Game.create = function(){
 	console.log("Game Start.");
-
+	
+	game.world.setBounds(0, 0, config.gameWorldWidth, config.gameWorldHeight);
+	
 	// enable physics
 	game.physics.startSystem(Phaser.Physics.ARCADE);
 	
 	// setup map
-	var map = game.add.tilemap('map');
-	map.addTilesetImage('tilesheet', 'tileset');
-	var layer;
-	for(var i = 0; i < map.layers.length; i++){
-		layer = map.createLayer(i);
-	}
-	layer.inputEnabled = true;
-	// layer.events.onInputUp.add(Game.getCoordinates, this);
-
+	Game.level = levelBuilder.createLevel();
+	
 	// init player container
 	Game.playerMap = {};
 	Game.nonLocalPlayerGroup = game.add.group();
@@ -51,10 +47,17 @@ Game.create = function(){
 
 	// init network
 	var playerType = Game.randomPlayerType().key;
+	if(config.debugPlayerType){
+		playerType = config.debugPlayerType;
+	}
+
 	Client.askNewPlayer(playerType);
 	networking.create();
 
 	// characterLoader.testAnimation();
+	// effect.test();
+	// Game.testZap();
+	// Game.testDie();
 }
 
 Game.update = function(){
@@ -72,18 +75,10 @@ Game.update = function(){
 
 }
 
-Game.render = function(){
-	if(config.debugPlayerBody && Game.playerMap){
-		Object.keys(Game.playerMap).forEach(function(key){
-			game.debug.body(Game.playerMap[key].sprite);
-			game.debug.pixel(Game.playerMap[key].sprite.x, Game.playerMap[key].sprite.y, 'rgba(0,0,255,1)', 4);
-			game.debug.pixel(Game.playerMap[key].x, Game.playerMap[key].y, 'rgba(255,0,0,1)', 4);
-			game.debug.spriteBounds(Game.playerMap[key].sprite, 'rgba(255,0,0,1)', false)
-		});
-	}
-
-	if(config.debugPlayerState && Game.localPlayer){
-		game.debug.text(Game.localPlayer.playerfsm.state, 50, 50, 'rgba(0,0,255,1)');
+// debug
+if(config.debug){
+	Game.render = function(){	
+		Game.debugOnRender();
 	}
 }
 
@@ -136,7 +131,11 @@ Game.addNewPlayer = function(id,x,y,isLocalPlayer,playerType){
 	if(isLocalPlayer){
 		// record local player info
 		Game.localPlayer = newPlayer;
-		Game.localPlayerID = id;			
+		Game.localPlayerID = id;	
+		game.camera.follow(newPlayer.sprite, 
+			Phaser.Camera.FOLLOW_PLATFORMER, 
+			config.cameraFollowLerpX, 
+			config.cameraFollowLerpY);
 	} 
 
 	return newPlayer;
@@ -152,17 +151,17 @@ Game.removePlayer = function(id){
 };
 
 // called when local player wants to upload current position
-Game.sendPlayerPos = function(x, y, direction){
-	Client.sendPosition(Game.localPlayerID, x, y, direction);
+Game.sendPlayerPos = function(x, y, direction, life){
+	Client.sendPosition(Game.localPlayerID, x, y, direction, life);
 }
 
 // called when server informs a player's position
-Game.syncPlayerPos = function(id, x, y, direction){
+Game.syncPlayerPos = function(id, x, y, direction, life){
 	if(!networking.ready)
 		return;
 
 	var player = Game.playerMap[id];
-	player.onSyncPosition(x, y, direction);
+	player.onSyncPosition(x, y, direction, life);
 }
 
 
@@ -179,13 +178,15 @@ Game.recvPlayerState = function(id, state){
 };
 
 
-Game.sendDealDamage = function(sourceID, targetID, damage){
-	Client.sendDealDamage(sourceID, targetID, damage);
+Game.sendDealDamage = function(sourceID, targetID, damage, onHitType, onHitPosX, onHitPosY){
+	Client.sendDealDamage(sourceID, targetID, damage, onHitType, onHitPosX, onHitPosY);
+	// react to the damage message on sender immediately.
+	Game.recvDamage(sourceID, targetID, damage, onHitType, onHitPosX, onHitPosY);
 }
 
-Game.recvDamage = function(sourceID, targetID, damage){
-	if(targetID == Game.localPlayerID){
-		Game.localPlayer.takeDamage(sourceID, targetID, damage);
+Game.recvDamage = function(sourceID, targetID, damage, onHitType, onHitPosX, onHitPosY){
+	if(networking.ready){
+		Game.playerMap[targetID].takeDamage(sourceID, targetID, damage, onHitType, onHitPosX, onHitPosY);
 	}
 }
 
@@ -291,4 +292,114 @@ Game.randomPlayerType = function(){
 
 Game.randomBulletType = function(){
 	return Game.randomItem(config.bulletType);
+}
+
+// rough culling for sprites, but good enough for demo
+Game.isPosInView = function(x, y){
+	return game.camera.view.contains(x, y);
+}
+
+Game.randomSign = function(){
+	if(Math.random() >= 0.5)
+		return 1;
+	return -1;
+}
+
+// --------------------------------------------
+// Debug
+// --------------------------------------------
+Game.debugOnRender = function() {
+	Game.debugTextY = 4;
+	
+	if(config.debugPlayerBody && Game.playerMap){
+		Object.keys(Game.playerMap).forEach(function(key){
+			game.debug.body(Game.playerMap[key].sprite);
+			game.debug.pixel(Game.playerMap[key].gun_x - game.camera.x,
+				Game.playerMap[key].gun_y - game.camera.y, 'rgba(0,0,255,1)', 4);
+			game.debug.pixel(Game.playerMap[key].x - game.camera.x,
+				Game.playerMap[key].y - game.camera.y, 'rgba(255,0,0,1)', 4);
+			game.debug.spriteBounds(Game.playerMap[key].sprite, 'rgba(255,0,0,1)', false)
+		});
+	}
+
+	if(config.debugPlayerState && Game.localPlayer){
+		Game.debugTextY += 10;
+		game.debug.text(Game.localPlayer.playerfsm.state, 2, Game.debugTextY,  "#00ff00");
+	}
+
+	if(config.debugFPS){
+		Game.debugTextY += 10;
+		game.debug.text(game.time.fps || '--', 2, Game.debugTextY, "#00ff00");
+	}
+
+	if(config.debugLevelBlockBody){
+		Game.level.blockGroup.forEachAlive(function(member){game.debug.body(member);}, this);
+	}
+
+	if(config.debugBulletBody){
+		Object.keys(Game.playerMap).forEach(function(key){
+			var player = Game.playerMap[key];
+			Object.keys(player.bullets).forEach(function(bk){
+				var bullet = player.bullets[bk];
+				game.debug.body(bullet.sprite);
+				game.debug.pixel(bullet.x - game.camera.x, bullet.y - game.camera.y, 'rgba(255,0,0,1)', 4);
+				game.debug.spriteBounds(bullet.sprite, 'rgba(255,0,0,1)', false)
+			});
+		});
+	}
+
+	if(config.debugEffectPool){
+		if(effect && effect.pools){
+			Object.keys(effect.pools).forEach(function(key, index){
+				Game.debugTextY += 10;
+				game.debug.text("pool: " + key + ", total: " + effect.pools[key].length, 2, Game.debugTextY, "#00ff00");
+			});
+		}
+	}
+
+	if(config.debugProfile){
+		var keys = Object.keys(Game.playerMap);
+		var renderedPlayers = 0;
+		for(var i = 0; i < keys.length; i++){
+			if(Game.playerMap[keys[i]].sprite.visible){
+				renderedPlayers++;
+			}
+		}
+
+		Game.debugTextY += 10;
+		game.debug.text("players: " + keys.length + ", rendered: " + renderedPlayers, 2, Game.debugTextY, "#00ff00");
+		
+		var totalBullets = 0;
+		keys.forEach(function(key){
+			var bullets = Game.playerMap[key].bullets;
+			totalBullets += Object.keys(bullets).length;
+		});
+		Game.debugTextY += 10;
+		game.debug.text("bullets: " + totalBullets, 2, Game.debugTextY, "#00ff00");
+	}
+
+	if(config.debugBulletPool){
+		if(characterLoader && characterLoader.bulletPool){
+			Object.keys(characterLoader.bulletPool).forEach(function(key, index){
+				Game.debugTextY += 10;
+				game.debug.text("pool: " + key + ", total: " + characterLoader.bulletPool[key].length, 2, Game.debugTextY, "#00ff00");
+			});
+		}
+	}
+}
+
+Game.testZap = function(){
+	game.input.onDown.add(function(){
+		if(Game.localPlayer)
+			Game.localPlayer.zap();
+	});
+}
+
+Game.testDie = function(){
+	game.input.onDown.add(function(){
+		if(Game.localPlayer){
+			Game.localPlayer.takeDamage(Game.localPlayerID, Game.localPlayerID, 
+				999999, "shotgunhit", Game.localPlayer.x, Game.localPlayer.y);
+		}
+	});
 }

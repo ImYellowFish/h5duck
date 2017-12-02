@@ -20,16 +20,23 @@ Client.sendClick = function(x, y){
 };
 
 // called when local player wants to upload self position
-Client.sendPosition = function(id, x, y, direction){
-	Client.socket.emit('uploadPos', {id:id, x:x, y:y, direction:direction});
+Client.sendPosition = function(id, x, y, direction, life){
+	Client.socket.emit('uploadPos', {id:id, x:x, y:y, direction:direction, life:life});
 };
 
 Client.sendPlayerState = function(id, state){
 	Client.socket.emit('playerState', {id:id, state:state});
 };
 
-Client.sendDealDamage = function(sourceID, targetID, damage){
-	Client.socket.emit('dealDamage', {sourceID:sourceID, targetID:targetID, damage:damage});
+Client.sendDealDamage = function(sourceID, targetID, damage, onHitType, onHitPosX, onHitPosY){
+	Client.socket.emit('dealDamage',{
+		sourceID: sourceID, 
+		targetID: targetID, 
+		damage: damage, 
+		onHitType: onHitType, 
+		onHitPosX: onHitPosX, 
+		onHitPosY: onHitPosY
+	});
 }
 
 Client.sendPlayerDie = function(playerID, killerID){
@@ -86,7 +93,7 @@ Client.socket.on('move', function(data){
 });
 
 Client.socket.on('syncPos', function(data){
-	Game.syncPlayerPos(data.id, data.x, data.y, data.direction);
+	Game.syncPlayerPos(data.id, data.x, data.y, data.direction, data.life);
 });
 
 Client.socket.on('playerState', function(data){
@@ -94,7 +101,7 @@ Client.socket.on('playerState', function(data){
 });
 
 Client.socket.on('recvDamage', function(data){
-	Game.recvDamage(data.sourceID, data.targetID, data.damage);
+	Game.recvDamage(data.sourceID, data.targetID, data.damage, data.onHitType, data.onHitPosX, data.onHitPosY);
 });
 
 Client.socket.on('playerDie', function(data){

@@ -1,13 +1,19 @@
 var PreGame = {};
 
 PreGame.create = function(){
+	game.add.plugin(PhaserInput.Plugin);
+
+	// resize the game
 	PreGame.resize();
+
+	// PreGame.inputUserName = game.add.inputField(10, 90);
 }
 
 PreGame.update = function(){
 	if(PreGame.isCorrectOrientation()){
 		game.state.start('Game');
 	}
+
 }
 
 // --------------------------------------------

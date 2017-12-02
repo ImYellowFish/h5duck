@@ -1,37 +1,4 @@
 config.playerType = {
-	// The default player
-	default:{
-		key : "default",
-		spriteName : "red",
-		anchorX : 0.5,
-		anchorY : 0.5,
-
-		// physics
-		moveForceX : 10,
-		moveForceY : -15,
-		maxVelocityX : 220,
-		maxVelocityY : 220,
-		gravity : 200,
-		drag : 0,
-		bounceX : 0.2,
-		bounceY : 0.2,
-		
-		// hitBox
-		useCustomHitBox : true,
-		hitBoxWidth : 30,
-		hitBoxHeight : 40,
-		hitBoxOfffsetX : 60,
-		hitBoxOfffsetY : 30,
-
-		// battle
-		maxLife : 80,
-		bulletType : "default",
-		attackFrame : 9,
-		onhitFrame : 10,
-	},
-
-	// player type: baddie
-	// fast but fragile
 	red:{
 		key : "red",
 		spriteName : "red",
@@ -39,7 +6,7 @@ config.playerType = {
 		anchorY : 0.5,
 
 		// physics
-		moveForceX : 10,
+		moveForceX : 30,
 		moveForceY : -15,
 		maxVelocityX : 220,
 		maxVelocityY : 220,
@@ -54,12 +21,18 @@ config.playerType = {
 		hitBoxHeight : 40,
 		hitBoxOfffsetX : 60,
 		hitBoxOfffsetY : 30,
+		
+		// shoot position
+		gunOffsetX : 45,
+		gunOffsetY : -10,
 
 		// battle
 		maxLife : 80,
-		bulletType : "default",
+		bulletType : "shotgun",
 		attackFrame : 9,
 		onhitFrame : 10,
+		shootCooldown: 1000,
+		moveStepCooldown: 0,
 	},
      
 
@@ -81,8 +54,8 @@ config.playerType = {
 		maxVelocityY : 120,
 		gravity : 100,
 		drag : 0,
-		bounceX : 0.2,
-		bounceY : 0.2,
+		bounceX : 0.5,
+		bounceY : 0.5,
 
 		// hitBox
 		useCustomHitBox : true,
@@ -91,11 +64,17 @@ config.playerType = {
 		hitBoxOfffsetX : 45,
 		hitBoxOfffsetY : 40,
 
+		// shoot position
+		gunOffsetX : 10,
+		gunOffsetY : -50,
+
 		// battle
-		maxLife : 60,
-		bulletType : "default",
+		maxLife : 100,
+		bulletType : "missile",
 		attackFrame : 9,
 		onhitFrame : 10,
+		shootCooldown: 1000,
+		moveStepCooldown: 0,
 	},
       
 
@@ -126,11 +105,17 @@ config.playerType = {
 		hitBoxOfffsetX : 60,
 		hitBoxOfffsetY : 30,
 
+		// shoot position
+		gunOffsetX : 35,
+		gunOffsetY : -10,
+
 		// battle
 		maxLife : 50,
-		bulletType : "default",
+		bulletType : "shuriken",
 		attackFrame : 9,
 		onhitFrame : 10,
+		shootCooldown: 1000,
+		moveStepCooldown: 0,
 	},
 
 
@@ -160,11 +145,17 @@ config.playerType = {
 		hitBoxOfffsetX : 160,
 		hitBoxOfffsetY : 40,
 		
+		// shoot position
+		gunOffsetX : 70,
+		gunOffsetY : -30,
+
 		// battle
 		maxLife : 70,
-		bulletType : "default",
+		bulletType : "fork",
 		attackFrame : 9,
 		onhitFrame : 10,
+		shootCooldown: 1000,
+		moveStepCooldown: 0,
 	},
 
 }

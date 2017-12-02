@@ -10,11 +10,13 @@ var io = require('socket.io').listen(server);
 app.use('/css', express.static(__dirname + '/css'));
 app.use('/js', express.static(__dirname + '/js'));
 app.use('/assets', express.static(__dirname + '/assets'));
+app.use('/phaser-input', express.static(__dirname + '/node_modules/@orange-games/phaser-input/build/'));
 
 app.get('/', function(req, res){
 	res.sendFile(__dirname + '/index.html');
 });
 
+server.lastPlayerID = 0;
 server.listen(8081, function(){
 	console.log('Listening on ' + server.address().port);
 });
@@ -23,7 +25,6 @@ var g_logLevel = 2;
 // --------------------------------------------
 // messages
 // --------------------------------------------
-server.lastPlayerID = 0;
 io.on('connection', function(socket){
 
 	// ------------- login/logout -----------------------------
@@ -67,17 +68,19 @@ io.on('connection', function(socket){
 
 		socket.on('playerState', function(data){
 			socket.player.state = data.state;
+			logs(2, data.id, data.state);
 			socket.broadcast.emit('playerState', data);
 		});
 
 		// called when some player deals damage to another
 		socket.on('dealDamage', function(data){
-			var targetSocket = findSocket(data.targetID);
-			if(targetSocket){
-				targetSocket.emit('recvDamage', data);
-				logs(2, 'send damage:', 'from', data.sourceID, 'to', data.targetID, 'damage', data.damage);
-				
-			}
+			// var targetSocket = findSocket(data.targetID);
+			// if(targetSocket){
+			// 	targetSocket.emit('recvDamage', data);
+			// 	logs(2, 'send damage:', 'from', data.sourceID, 'to', data.targetID, 'damage', data.damage);				
+			// }
+			socket.broadcast.emit('recvDamage', data);
+			logs(2, 'send damage:', 'from', data.sourceID, 'to', data.targetID, 'damage', data.damage);	
 		});
 
 		socket.on('playerDie', function(data){
