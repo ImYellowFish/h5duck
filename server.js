@@ -16,12 +16,13 @@ app.get('/', function(req, res){
 	res.sendFile(__dirname + '/index.html');
 });
 
-server.lastPlayerID = 0;
+server.lastPlayerID = 1;
 server.listen(8081, function(){
 	console.log('Listening on ' + server.address().port);
 });
 
 var g_logLevel = 2;
+
 // --------------------------------------------
 // messages
 // --------------------------------------------
@@ -38,6 +39,8 @@ io.on('connection', function(socket){
 			x: randomInt(100, 400),
 			y: randomInt(100, 400),
 			state: "idle",
+			kills: 0,
+			deaths: 0,
 		};
 		playerIDSocketMap[socket.player.id] = socket;
 		
@@ -85,6 +88,17 @@ io.on('connection', function(socket){
 		});
 
 		socket.on('playerDie', function(data){
+			var victim = socket.player;
+			var killer = playerIDSocketMap[data.killerID] ? playerIDSocketMap[data.killerID].player : null;
+
+			// update kd
+			if(data.playerID != data.killerID && killer){
+				kill.kills++;
+			}
+			if(data.victim){
+				kill.death++;
+			}
+
 			socket.broadcast.emit('playerDie', data);
 			logs(3, 'player die', data.playerID, 'killer', data.killerID)
 			
