@@ -4,15 +4,17 @@ var networking = {};
 networking.networkFPS = 20;
 networking.updateInterval = 60 / networking.networkFPS;
 networking.updaters = [];
-networking.ready = false;
 networking.interpolateInterval = 1200 / networking.networkFPS;
+
+networking.heartbeatTimer = 0;
+networking.heartbeatInterval = 60;
 
 networking.create = function(){
 	networking.updateTimer = 0;
 }
 
 networking.update = function(){
-	if(!networking.ready){
+	if(!Game.ready){
 		return;
 	}
 
@@ -25,6 +27,12 @@ networking.update = function(){
 
 		networking.updateTimer = 0;
 	}
+
+	// networking.heartbeatTimer++;
+	// if(networking.heartbeatTimer > networking.heartbeatInterval){
+	// 	Client.sendHeartBeat();
+	// 	networking.heartbeatTimer = 0;
+	// }
 }
 
 networking.registerUpdate = function(callback){
@@ -53,6 +61,10 @@ networking.SpritePosSynchronizer = {
 		var sync = {};
 		sync.sprite = sprite;
 		
+		sync.setSprite = function(sprite){
+			sync.sprite = sprite;
+		}
+
 		sync.reset = function(x, y){
 			var initPosInfo = {x:x, y:y, time:Date.now()};
 			sync.serverUpdates = [initPosInfo, initPosInfo];

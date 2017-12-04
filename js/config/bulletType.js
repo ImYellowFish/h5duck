@@ -60,9 +60,9 @@ config.bulletType = {
 		recoil : 50,
 
 		// physics
-		velocityX : 100,
-		velocityY : -50,
-		gravity : 50,
+		velocityX : 600,
+		velocityY : -400,
+		gravity : 1200,
 		drag : 0,
 		bounce : 0.3,
 		collideWithBlocks : true,
@@ -72,10 +72,10 @@ config.bulletType = {
 
 		// hitBox
 		useCustomHitBox : true,
-		hitBoxWidth : 80,
-		hitBoxHeight : 40,
-		hitBoxOfffsetX : 60,
-		hitBoxOfffsetY : 30,
+		hitBoxWidth : 65,
+		hitBoxHeight : 32,
+		hitBoxOfffsetX : 52,
+		hitBoxOfffsetY : 35,
 
 		// effect
 		onHitType: "blasthit",
@@ -142,14 +142,14 @@ config.bulletType = {
 		loop: true,
 
 		// battle
-		damage : 10,
+		damage : 15,
 		penetrate : false,
-		duration : 2000,
+		duration : 5000,
 		friendlyFire : true,
 		recoil : 25,
 
 		// physics
-		velocityX : 300,
+		velocityX : 600,
 		velocityY : 0,
 		gravity : 10,
 		drag : 0,
@@ -194,8 +194,8 @@ config.bulletType = {
 		recoil : 0,
 
 		// physics
-		velocityX : 200,
-		velocityY : -100,
+		velocityX : 1000,
+		velocityY : -50,
 		gravity : 100,
 		drag : 0,
 		bounce : 0.2,
@@ -236,7 +236,7 @@ config.bulletType = {
 
 		// physics
 		velocityX : 150,
-		velocityY : -100,
+		velocityY : -200,
 		gravity : 0,
 		drag : 0,
 		bounce : 0.1,

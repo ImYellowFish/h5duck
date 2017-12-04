@@ -47,6 +47,30 @@
       "key": "zap2",
       "url": "assets/level/zap2.png",
       "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "jelly1",
+      "url": "assets/level/jelly1.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "jelly2",
+      "url": "assets/level/jelly2.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "jelly0",
+      "url": "assets/level/jelly0.png",
+      "overwrite": false
+    },
+    {
+      "type": "image",
+      "key": "water",
+      "url": "assets/level/water.png",
+      "overwrite": false
     }
   ],
   "meta": {

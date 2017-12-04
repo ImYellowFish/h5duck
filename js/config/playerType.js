@@ -6,14 +6,14 @@ config.playerType = {
 		anchorY : 0.5,
 
 		// physics
-		moveForceX : 30,
-		moveForceY : -15,
-		maxVelocityX : 220,
-		maxVelocityY : 220,
-		gravity : 200,
+		moveForceX : 7,
+		moveForceY : -14,
+		maxVelocityX : 100,
+		maxVelocityY : 100,
+		gravity : 300,
 		drag : 0,
-		bounceX : 0.2,
-		bounceY : 0.2,
+		bounceX : 0.7,
+		bounceY : 0.7,
 		
 		// hitBox
 		useCustomHitBox : true,
@@ -27,11 +27,11 @@ config.playerType = {
 		gunOffsetY : -10,
 
 		// battle
-		maxLife : 80,
+		maxLife : 120,
 		bulletType : "shotgun",
 		attackFrame : 9,
 		onhitFrame : 10,
-		shootCooldown: 1000,
+		shootCooldown: 3000,
 		moveStepCooldown: 0,
 	},
      
@@ -48,11 +48,11 @@ config.playerType = {
 		anchorY : 0.5,
 		
 		// physics
-		moveForceX : 5,
-		moveForceY : -5,
+		moveForceX : 10,
+		moveForceY : -20,
 		maxVelocityX : 120,
 		maxVelocityY : 120,
-		gravity : 100,
+		gravity : 300,
 		drag : 0,
 		bounceX : 0.5,
 		bounceY : 0.5,
@@ -73,7 +73,7 @@ config.playerType = {
 		bulletType : "missile",
 		attackFrame : 9,
 		onhitFrame : 10,
-		shootCooldown: 1000,
+		shootCooldown: 1500,
 		moveStepCooldown: 0,
 	},
       
@@ -89,11 +89,11 @@ config.playerType = {
 		anchorY : 0.5,
 		
 		// physics
-		moveForceX : 5,
-		moveForceY : -5,
-		maxVelocityX : 120,
-		maxVelocityY : 120,
-		gravity : 100,
+		moveForceX : 20,
+		moveForceY : -40,
+		maxVelocityX : 200,
+		maxVelocityY : 200,
+		gravity : 300,
 		drag : 0,
 		bounceX : 0.2,
 		bounceY : 0.2,
@@ -110,7 +110,7 @@ config.playerType = {
 		gunOffsetY : -10,
 
 		// battle
-		maxLife : 50,
+		maxLife : 70,
 		bulletType : "shuriken",
 		attackFrame : 9,
 		onhitFrame : 10,
@@ -129,11 +129,11 @@ config.playerType = {
 		anchorY : 0.6,
 		
 		// physics
-		moveForceX : 5,
-		moveForceY : -5,
-		maxVelocityX : 120,
-		maxVelocityY : 120,
-		gravity : 100,
+		moveForceX : 15,
+		moveForceY : -30,
+		maxVelocityX : 160,
+		maxVelocityY : 160,
+		gravity : 300,
 		drag : 0,
 		bounceX : 0.2,
 		bounceY : 0.2,
@@ -150,11 +150,11 @@ config.playerType = {
 		gunOffsetY : -30,
 
 		// battle
-		maxLife : 70,
+		maxLife : 90,
 		bulletType : "fork",
 		attackFrame : 9,
 		onhitFrame : 10,
-		shootCooldown: 1000,
+		shootCooldown: 3000,
 		moveStepCooldown: 0,
 	},
 

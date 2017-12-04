@@ -103,14 +103,19 @@ var Bullet = {
 		// hit a player; do damage and other effect.
 		bullet.HitPlayer = function(bulletSprite, playerSprite){
 			var player = playerSprite.data.player;
+
 			// mark damaged players, so we hit them only once.
 			if(bullet.damagedPlayers[player.id])
 				return;
 			bullet.damagedPlayers[player.id] = 1;
 
+			var damage = bullet.damage;
+			if(bullet.player.id == player.id)
+				damage = bullet.damage * config.bulletFriendlyFireDamageFactor;
+
 			// damage the player
 			bullet.player.dealDamage(player.id, 
-				bullet.damage, 
+				damage, 
 				bullet.onHitType, 
 				game.math.average(player.x, bullet.x), 
 				game.math.average(player.y, bullet.y));

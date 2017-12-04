@@ -5,6 +5,11 @@
 var Game = {};
 
 Game.localPlayerName = "unknown";
+Game.localPlayerKills = 0;
+Game.localPlayerDeaths = 0;
+Game.rankToScore = null;
+
+Game.startTime = 0;
 Game.width = config.gameWidth * config.gameWindowScale;
 Game.height = config.gameHeight * config.gameWindowScale;
 
@@ -43,8 +48,10 @@ Game.create = function(){
 	
 	// init player container
 	Game.playerMap = {};
-	Game.nonLocalPlayerGroup = game.add.group();
-	Game.nonLocalPlayerGroup.enableBody = true;
+	if(!Game.nonLocalPlayerGroup){
+		Game.nonLocalPlayerGroup = game.add.group();
+		Game.nonLocalPlayerGroup.enableBody = true;
+	}
 
 	// init network
 	var playerType = Game.randomPlayerType().key;
@@ -52,6 +59,8 @@ Game.create = function(){
 		playerType = config.debugPlayerType;
 	}
 
+	// init network and require login
+	Client.init();
 	Client.askNewPlayer(playerType, Game.localPlayerName);
 	networking.create();
 
@@ -62,7 +71,7 @@ Game.create = function(){
 }
 
 Game.update = function(){
-	if(!networking.ready)
+	if(!Game.ready)
 		return;
 
 	// player updates
@@ -73,7 +82,7 @@ Game.update = function(){
 
 	// network updates
 	networking.update();
-
+	UI.update();
 }
 
 // debug
@@ -89,7 +98,7 @@ if(config.debug){
 // --------------------------------------------
 
 Game.getCoordinates = function(layer, pointer){
-	if(!networking.ready)
+	if(!Game.ready)
 		return;
 
 	// Client.sendClick(pointer.worldX, pointer.worldY);
@@ -98,7 +107,7 @@ Game.getCoordinates = function(layer, pointer){
 
 
 Game.movePlayer = function(x, y){
-	if(!networking.ready)
+	if(!Game.ready)
 		return;
 
 	Game.localPlayer.moveStep(x, y);
@@ -109,12 +118,12 @@ Game.movePlayer = function(x, y){
 // --------------------------------------------
 
 // ---------- general -------------------------
-Game.setNetworkReady = function(){
+Game.setReady = function(){
 	console.log('local player id: ' + Game.localPlayerID + ', localPlayer: ' + Game.localPlayer);
 	console.log(Game.playerMap);
 
 	// set the network as ready
-	networking.ready = true;
+	Game.ready = true;
 
 	// init UI here so UI has the highest draw order.
 	UI.create();
@@ -130,21 +139,48 @@ Game.addNewPlayer = function(id,x,y,isLocalPlayer,playerType, playerName){
 	newPlayer.registerNetUpdate();
 
 	if(isLocalPlayer){
-		// record local player info
-		Game.localPlayer = newPlayer;
-		Game.localPlayerID = id;	
-		game.camera.follow(newPlayer.sprite, 
-			Phaser.Camera.FOLLOW_PLATFORMER, 
-			config.cameraFollowLerpX, 
-			config.cameraFollowLerpY);
+		Game.registerLocalPlayer(newPlayer);
 	} 
 
 	return newPlayer;
 };
 
+Game.registerLocalPlayer = function(player){
+	Game.localPlayer = player;
+	Game.localPlayerID = player.id;
+	game.camera.follow(player.sprite, 
+			Phaser.Camera.FOLLOW_PLATFORMER, 
+			config.cameraFollowLerpX, 
+			config.cameraFollowLerpY);
+}
+
+
+Game.changePlayerType = function(id, x, y, isLocalPlayer, playerType, playerName){
+	// hack
+	if(isLocalPlayer){
+		x = Game.localPlayer.x;
+		y = Game.localPlayer.y;
+	}
+
+	console.log("change type", id, x, y, isLocalPlayer, playerType, playerName);
+	var player = Game.playerMap[id];
+	var life = player.life;
+	var dir = player.direction;
+	player.setPlayerType(playerType);
+	player.life = life * 0.7;
+	player.x = x;
+	player.y = y;
+	player.direction = dir;
+
+	if(isLocalPlayer){
+		Game.registerLocalPlayer(player);
+		Client.sendChangePlayerType(id, x, y, playerType, playerName);	
+	}
+}
+
 // called when server commands removing player
 Game.removePlayer = function(id){
-	if(!networking.ready)
+	if(!Game.ready)
 		return;
 
 	Game.playerMap[id].onRemove();
@@ -158,7 +194,7 @@ Game.sendPlayerPos = function(x, y, direction, life){
 
 // called when server informs a player's position
 Game.syncPlayerPos = function(id, x, y, direction, life){
-	if(!networking.ready)
+	if(!Game.ready)
 		return;
 
 	var player = Game.playerMap[id];
@@ -171,7 +207,7 @@ Game.sendPlayerState = function(state){
 };
 
 Game.recvPlayerState = function(id, state){
-	if(!networking.ready)
+	if(!Game.ready)
 		return;
 	var player = Game.playerMap[id];
 	if(player)
@@ -186,17 +222,20 @@ Game.sendDealDamage = function(sourceID, targetID, damage, onHitType, onHitPosX,
 }
 
 Game.recvDamage = function(sourceID, targetID, damage, onHitType, onHitPosX, onHitPosY){
-	if(networking.ready){
+	if(Game.ready){
 		Game.playerMap[targetID].takeDamage(sourceID, targetID, damage, onHitType, onHitPosX, onHitPosY);
 	}
 }
 
 Game.sendPlayerDie = function(playerID, killerID){
 	Client.sendPlayerDie(playerID, killerID);
+
+	// inform UI
+	UI.onPlayerDie(playerID, killerID);
 }
 
 Game.recvPlayerDie = function(playerID, killerID){
-	if(!networking.ready)
+	if(!Game.ready)
 		return;
 	var player = Game.playerMap[playerID];
 	if(!player)
@@ -212,6 +251,8 @@ Game.recvPlayerDie = function(playerID, killerID){
 		// do other things
 	}
 
+	// inform UI
+	UI.onPlayerDie(playerID, killerID);
 }
 
 Game.sendPlayerRespawn = function(playerID, x, y){
@@ -219,7 +260,7 @@ Game.sendPlayerRespawn = function(playerID, x, y){
 }
 
 Game.recvPlayerRespawn = function(playerID, x, y){
-	if(!networking.ready)
+	if(!Game.ready)
 		return;
 	if(playerID != Game.localPlayerID){
 		Game.playerMap[playerID].respawn(x, y);
@@ -235,7 +276,7 @@ Game.sendCreateBullet = function(bullet){
 
 // called when server informs that a new bullet is spawned
 Game.recvCreateBullet = function(bulletData){
-	if(!networking.ready)
+	if(!Game.ready)
 		return;
 
 	var player = Game.playerMap[bulletData.playerID];
@@ -249,7 +290,7 @@ Game.sendRemoveBullet = function(bullet){
 
 // called when server informs that a bullet is despawned
 Game.recvRemoveBullet = function(bulletData){
-	if(!networking.ready)
+	if(!Game.ready)
 		return;
 
 	var player = Game.playerMap[bulletData.playerID];
@@ -261,7 +302,7 @@ Game.sendBulletSync = function(bullet){
 }
 
 Game.recvBulletSync = function(bulletData){
-	if(!networking.ready)
+	if(!Game.ready)
 		return;
 
 	var player = Game.playerMap[bulletData.playerID];
@@ -275,6 +316,40 @@ Game.recvBulletSync = function(bulletData){
 	}
 }
 
+
+// ---------- Scores ---------------------------
+Game.recvUpdateScore = function(data){
+	console.log("new Score: ", data.kills, data.deaths);
+	Game.localPlayerKills = data.kills;
+	Game.localPlayerDeaths = data.deaths;
+
+	UI.onGameScoreChanged();
+}
+
+Game.recvUpdateRank = function(data){
+	console.log("rank:", data);
+	var leader = Game.playerMap[data.leaderID];
+	var leaderName = "??????";
+	var leaderScore = "?";
+	if(leader && data.leaderScore > 0){
+		leaderName = leader.name;
+		leaderScore = data.leaderScore;
+	}
+
+	var selfRank = data[Game.localPlayerKills];
+	if(!selfRank){
+		selfRank = "?";
+	}
+
+	UI.onGameRankChanged(
+		selfRank,
+		Game.localPlayerName,
+		Game.localPlayerKills,
+		leaderName,
+		leaderScore);
+}
+
+
 // --------------------------------------------
 // Utility
 // --------------------------------------------
@@ -283,12 +358,24 @@ Game.randomInt = function(high, low){
 }
 
 Game.randomItem = function(collection){
-	var keys = Object.keys(collection)
+	var keys = Object.keys(collection);
     return collection[keys[ keys.length * Math.random() << 0]];
+}
+
+Game.nextItem = function(collection, current){
+	var keys = Object.keys(collection);
+	var index = keys.indexOf(current);
+	var resultIndex = index >= 0 ? (index + 1) % keys.length : 0;
+	console.log("nextType", collection[keys[resultIndex]])
+	return keys[resultIndex];
 }
 
 Game.randomPlayerType = function(){
 	return Game.randomItem(config.playerType);
+}
+
+Game.nextPlayerType = function(type){
+	return Game.nextItem(config.playerType, type);
 }
 
 Game.randomBulletType = function(){
@@ -304,6 +391,10 @@ Game.randomSign = function(){
 	if(Math.random() >= 0.5)
 		return 1;
 	return -1;
+}
+
+Game.addNonLocalPlayer = function(player){
+	Game.nonLocalPlayerGroup.add(player.sprite);
 }
 
 // --------------------------------------------
@@ -335,6 +426,12 @@ Game.debugOnRender = function() {
 
 	if(config.debugLevelBlockBody){
 		Game.level.blockGroup.forEachAlive(function(member){game.debug.body(member);}, this);
+	}
+
+	if(config.debugLevelZapBody){
+		Game.level.zapGroup.forEachAlive(function(member){game.debug.body(member);}, this);
+		Game.level.jellyGroup.forEachAlive(function(member){game.debug.body(member);}, this);
+		Game.level.waterGroup.forEachAlive(function(member){game.debug.body(member);}, this);
 	}
 
 	if(config.debugBulletBody){

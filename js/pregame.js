@@ -10,12 +10,13 @@ PreGame.create = function(){
 	// resize the game
 	PreGame.resize();
 
+	// show login
 	PreGame.inputUserName = 
-		game.add.inputField(550, 250, {
-		    font: '24px Arial',
+		game.add.inputField(250, 0, {
+		    font: '56px Arial',
 		    fill: '#212121',
 		    fontWeight: 'bold',
-		    width: 150,
+		    width: 350,
 		    padding: 8,
 		    borderWidth: 1,
 		    borderColor: '#000',
@@ -24,15 +25,19 @@ PreGame.create = function(){
 		    type: PhaserInput.InputType.text,
 		});
 	
-	PreGame.loginButton = game.add.button(660, 500, 'ui', PreGame.onLoginButton, this, 
-		'hpBarBgPlayer.png', 'hpBarBgPlayer.png', 'hpBarBgPlayer.png', 'hpBarPlayer.png');
+	PreGame.loginButton = game.add.button(400, 200, 'ui', PreGame.onLoginButton, this, 
+		'confirm.png', 'confirm.png', 'confirmdown.png', 'confirm.png');
 	PreGame.loginButton.anchor.setTo(0.5, 0.5);
-	PreGame.loginButton.scale.setTo(0.5, 1);
+	PreGame.loginButton.scale.setTo(0.4, 0.4);
 
-	PreGame.loginButtonText = game.add.text(PreGame.loginButton.centerX, 
-		PreGame.loginButton.centerY, "开始");
-	PreGame.loginButtonText.anchor.setTo(0.5, 0.5);
+	// PreGame.loginButtonText = game.add.text(PreGame.loginButton.centerX, 
+	// 	PreGame.loginButton.centerY, "开始");
+	// PreGame.loginButtonText.anchor.setTo(0.5, 0.5);
 	
+	if(config.debug && config.debugSkipLogin){
+		Game.localPlayerName = "test" + Game.randomInt(1, 300);
+		game.state.start('Game');
+	}
 }
 
 PreGame.update = function(){
@@ -52,16 +57,16 @@ PreGame.resize = function(){
 		 game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 		 game.scale.minWidth = Game.width / 2;
 		 game.scale.minHeight = Game.height / 2;
-		 game.scale.maxWidth = Game.width * 3;
-		 game.scale.maxHeight = Game.height * 3;
+		 game.scale.maxWidth = Game.width * 2;
+		 game.scale.maxHeight = Game.height * 2;
 		 game.scale.pageAlignHorizontally = true;
 		 game.scale.pageAlignVertically = true;
 	 } else{
 		 game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 		 game.scale.minWidth = Game.width / 2;
 		 game.scale.minHeight = Game.height / 2;
-		 game.scale.maxWidth = Game.width * 3; //You can change this to gameWidth*2.5 if needed
-		 game.scale.maxHeight = Game.height * 3; //Make sure these values are proportional to the gameWidth and gameHeight
+		 game.scale.maxWidth = Game.width * 2; //You can change this to gameWidth*2.5 if needed
+		 game.scale.maxHeight = Game.height * 2; //Make sure these values are proportional to the gameWidth and gameHeight
 		 game.scale.pageAlignHorizontally = true;
 		 game.scale.pageAlignVertically = true;
 		 game.scale.forceOrientation(true, false);
@@ -69,6 +74,7 @@ PreGame.resize = function(){
 		 game.scale.enterIncorrectOrientation.add(PreGame.enterIncorrectOrientation, this);
 		 game.scale.leaveIncorrectOrientation.add(PreGame.leaveIncorrectOrientation, this);
 	}
+
 };
 
 PreGame.enterIncorrectOrientation = function(){
@@ -88,6 +94,7 @@ PreGame.isCorrectOrientation = function(){
 }
 
 PreGame.onLoginButton = function(){
+	PreGame.resize();
 	Game.localPlayerName = PreGame.inputUserName.text.text;
 	console.log(Game.localPlayerName);
 	game.state.start('Game');

@@ -11,6 +11,10 @@ var Cooldown = {
 			cooldown.value -= game.time.physicsElapsedMS;
 		};
 
+		cooldown.set = function(val){
+			cooldown.value = val;
+		}
+
 		cooldown.reset = function(){
 			cooldown.value = cooldown.maxValue;
 		}

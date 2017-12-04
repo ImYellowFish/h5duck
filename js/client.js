@@ -1,6 +1,9 @@
 // Network client
 var Client = {};
-Client.socket = io.connect();
+
+// init entry
+Client.init = function(){
+	Client.socket = io.connect();
 
 // --------------------------------------------
 // functions
@@ -12,7 +15,9 @@ Client.askNewPlayer = function(playerType, playerName){
 	Client.socket.emit('newplayer', {playerType:playerType, playerName:playerName});
 };
 
-
+Client.sendHeartBeat = function(x, y){
+	Client.socket.emit('heartBeat', {});
+};
 // ---------- player ---------------------------
 // called when local player wants to send an input
 Client.sendClick = function(x, y){
@@ -45,6 +50,10 @@ Client.sendPlayerDie = function(playerID, killerID){
 
 Client.sendPlayerRespawn = function(playerID, x, y){
 	Client.socket.emit('playerRespawn', {playerID:playerID, x:x, y:y});
+}
+
+Client.sendChangePlayerType = function(id, x, y, playerType, playerName){
+	Client.socket.emit('changePlayerType', {id: id, x:x, y:y, playerType:playerType, playerName:playerName});
 }
 
 // ---------- bullet ---------------------------
@@ -81,7 +90,10 @@ Client.socket.on('allplayers', function(data){
 		Game.addNewPlayer(players[i].id, players[i].x, players[i].y, 
 			isLocalPlayer, players[i].playerType, players[i].playerName);
 	}
-	Game.setNetworkReady();
+	Game.startTime = data.startTime;
+	console.log("server start", Game.startTime);
+	Game.setReady();
+	Game.recvUpdateRank(data.scoreToRank);
 });
 
 Client.socket.on('remove', function(id){
@@ -114,6 +126,10 @@ Client.socket.on('playerRespawn', function(data){
 	Game.recvPlayerRespawn(data.playerID, data.x, data.y);
 });
 
+Client.socket.on('changePlayerType', function(data){
+	Game.changePlayerType(data.id, data.x, data.y, data.id === Game.localPlayerID, data.playerType, data.playerName);
+})
+
 // ---------- bullet ---------------------------
 Client.socket.on('createBullet', function(data){
 	Game.recvCreateBullet(data);
@@ -126,3 +142,16 @@ Client.socket.on('removeBullet', function(data){
 Client.socket.on('bulletSync', function(data){
 	Game.recvBulletSync(data);
 });
+
+
+// ---------- Scores ---------------------------
+Client.socket.on('updateScore', function(data){
+	Game.recvUpdateScore(data);
+});
+
+Client.socket.on('updateRank', function(data){
+	Game.recvUpdateRank(data);
+});
+
+
+};

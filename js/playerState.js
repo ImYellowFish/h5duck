@@ -60,6 +60,12 @@ var PlayerFSM = {
 			if(playerfsm.timer){
 				playerfsm.timer.destroy();
 			}
+			if(playerfsm.zapSprite){
+				playerfsm.zapSprite.kill();
+			}
+			if(playerfsm.deathSprite){
+				playerfsm.deathSprite.kill();
+			}
 		}
 
 
@@ -96,7 +102,7 @@ var PlayerFSM = {
 				sprite.x = playerfsm.player.x;
 				sprite.y = playerfsm.player.y;
 				sprite.visible = playerfsm.player.isInView;
-			}
+			}			
 		}
 
 		playerfsm.isVxZero = function(){

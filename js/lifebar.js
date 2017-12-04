@@ -80,10 +80,11 @@ var LifeBar = {
 		}
 
 		lifeBar.createPlayerNameLabel = function(){
-			var style = { font: "35px Arial", fill: "#ffffff", align: "center" };
+			var style = { font: "30px Arial", fill: "#ffffff", align: "center" };
 			var nameLabel = game.add.text(0, 0, lifeBar.player.name, style);
 			nameLabel.anchor.setTo(0.5);
-			
+			game.world.bringToTop(nameLabel);
+
 			return nameLabel;
 		}
 

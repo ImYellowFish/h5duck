@@ -4,19 +4,25 @@ var config = {
 // Debug
 // --------------------------------------------
 	// main control
-	debug : true,
+	debug : false,
 
 	debugFPS : true,
+
+	debugPlayerPool : true,
 
 	debugPlayerBody : false,
 
 	debugPlayerState : true,
 
 	debugPlayerUnlimitedHP : false,
-	
-	debugLevelBlockBody : false,
 
-	debugBulletBody : false,
+	debugPlayerOneHP : false,
+	
+	debugLevelBlockBody : true,
+
+	debugLevelZapBody : true,
+
+	debugBulletBody : true,
 
 	// values: null, 'black', 'red', 'yellow', 'blue'.
 	debugPlayerType : null,
@@ -27,6 +33,7 @@ var config = {
 
 	debugProfile : true,
 
+	debugSkipLogin : false,
 // --------------------------------------------
 // Game
 // --------------------------------------------
@@ -52,6 +59,8 @@ var config = {
     cameraFollowLerpY : 0.5,
 
     cameraDeadScreenAlpha : 0.6,
+
+    gameDurationInSeconds : 360,
 // --------------------------------------------
 // Player
 // --------------------------------------------
@@ -72,9 +81,6 @@ var config = {
 	// the scale for displaying players
 	playerSpriteScale : 2,
 
-	// default player type
-	playerDefaultType : "default",
-
 	// animation framerate
 	playerAnimationFramerate : 24,
 
@@ -93,7 +99,9 @@ var config = {
 	// player static duration after being zapped. (ms)
 	playerZapLockDuration : 1000,
 
-	defaultPlayerType : "yellow",
+	playerJellyVelocity : 500,
+
+	playerJellyMoveCooldown : 500,
 
 // --------------------------------------------
 // Bullet
@@ -117,6 +125,8 @@ var config = {
 	defaultBulletType : "missile",
 
 	bulletFriendlyFireProtection : 500,
+
+	bulletFriendlyFireDamageFactor : 0.25,
 // --------------------------------------------
 // UI
 // --------------------------------------------
@@ -128,5 +138,12 @@ var config = {
 	uiLifeBarPlayerMgSpeed : 2 / 60,
 	uiLifeBarEnemySpeed : 4 / 60,
 	uiNameTextOffsetY : -80,
+	uiRankScale : 0.4,
+	uiKillScrollViewAlpha : 0.6,
+	uiKillScrollViewScale : 0.3,
+	uiKillScrollViewMoveDuration : 200,
+	uiKillScrollViewVanishDelay : 5000,
+	uiKillScrollViewVanishDuration : 1000,
+	uiChangePlayerTypeCooldown : 1000,
 };
 

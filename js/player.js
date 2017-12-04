@@ -8,7 +8,7 @@ var Player = {
 // Constructor
 // --------------------------------------------
 	createNew : function(id, x, y, isLocalPlayer, type, playerName){
-
+		
 // --------------------------------------------
 // Setup
 // --------------------------------------------
@@ -17,16 +17,121 @@ var Player = {
 		player.isLocalPlayer = isLocalPlayer;
 		player.name = playerName;
 
-		// read player typeInfo
-		var playerTypeInfo = config.playerType[type];
-		if(!playerTypeInfo){
-			type = "default";
-			playerTypeInfo = config.playerType.default;
-		}
-		player.type = type;
-		player.playerTypeInfo = playerTypeInfo;
+		const c_frameToTime = 1000 / 24;
+// --------------------------------------------
+// Initialization
+// --------------------------------------------
+		player.setPlayerType = function(type){
+			// read player typeInfo
+			var playerTypeInfo = config.playerType[type];
+			if(!playerTypeInfo){
+				type = "default";
+				playerTypeInfo = config.playerType.default;
+			}
+			player.type = type;
+			player.playerTypeInfo = playerTypeInfo;
 
+			// player data
+			// life
+			player.maxLife = playerTypeInfo.maxLife;
+			player.life = player.maxLife;
+			if(config.debug){
+				if(config.debugPlayerUnlimitedHP){
+					player.maxLife = 999999;
+					player.life = 999999;
+				}else if(config.debugPlayerOneHP){
+					player.maxLife = 1;
+					player.life = 1;
+				}
+			}
+
+			// physics param
+			player.moveForceX = playerTypeInfo.moveForceX;
+			player.moveForceY = playerTypeInfo.moveForceY;
+			player.maxVelocityX = playerTypeInfo.maxVelocityX;
+			player.maxVelocityY = playerTypeInfo.maxVelocityY;
+
+			// misc
+			player.spriteName = playerTypeInfo.spriteName;
+			player.spriteScale = config.playerSpriteScale;
+			player.offsetX = playerTypeInfo.offsetX;
+			player.offsetY = playerTypeInfo.offsetY;
+			player.bulletType = playerTypeInfo.bulletType;
+		
+			// battle
+			player.gunOffsetX = playerTypeInfo.gunOffsetX;
+			player.gunOffsetY = playerTypeInfo.gunOffsetY;
+
+			player.attackDuration = (playerTypeInfo.attackFrame+1) * c_frameToTime;
+			player.onhitDuration = (playerTypeInfo.onhitFrame+1) * c_frameToTime;
+
+		
+			// clean up previous sprites and lifeBar
+			// for change player type
+			if(player.sprite)
+				player.sprite.destroy();
+			
+			// setup sprite
+			console.log("spriteName: " + player.spriteName);
+			var sprite = characterLoader.createCharacterSprite(x,y,player.spriteName);
+			player.sprite = sprite;
+			sprite.data.player = player;
+
+			sprite.scale.set(player.spriteScale);
+			sprite.anchor.set(playerTypeInfo.anchorX, playerTypeInfo.anchorY);
+
+			// setup physics
+			if(isLocalPlayer){			
+				// enable physics for localPlayer
+				game.physics.arcade.enableBody(sprite);
+				sprite.body.bounce.x = playerTypeInfo.bounceX;
+				sprite.body.bounce.y = playerTypeInfo.bounceY;
+				sprite.body.gravity.y = playerTypeInfo.gravity;
+				sprite.body.drag.setTo(playerTypeInfo.drag);
+				sprite.body.collideWorldBounds = true;
+				sprite.body.immovable = false;
+
+
+			}else{
+				// add to collision group
+				Game.addNonLocalPlayer(player);
+				// disable physics for nonLocalPlayer
+				sprite.body.immovable = true;
+			}
+
+			// setup hitBox	
+			if(playerTypeInfo.useCustomHitBox){
+				sprite.body.setSize(playerTypeInfo.hitBoxWidth, playerTypeInfo.hitBoxHeight, 
+					playerTypeInfo.hitBoxOfffsetX, playerTypeInfo.hitBoxOfffsetY);
+			}
+
+			// lifebar
+			if(!player.lifeBar)
+				player.lifeBar = LifeBar.createNew(player);
+
+			// position synchronizer
+			if(!player.posSync){
+				player.posSync = 
+					networking.SpritePosSynchronizer.createNew(
+						player.sprite);
+			}
+			else{
+				player.posSync.setSprite(sprite);
+			}
+
+			// cooldowns
+			if(player.isLocalPlayer){
+				player.zapProtection = Cooldown.createNew(config.playerZapProtection);
+				player.shootCooldown = Cooldown.createNew(playerTypeInfo.shootCooldown, 0);
+				player.moveStepCooldown = Cooldown.createNew(playerTypeInfo.moveStepCooldown, 0);
+				player.respawnProtection = Cooldown.createNew(config.playerRespawnProtection);
+			}
+		}
+
+
+		
 		// --------------- initialize parameters ----------------------
+		
 		// flags
 		// whether the player is waiting for respawn
 		player.isAlive = true;
@@ -36,84 +141,16 @@ var Player = {
 
 		// the killer of the player
 		player.killerID = -1;
+		player.lastHitSourceID = player.id;
 
 		// facing direction
 		player.initDirection = config.playerInitFacingDir;
 		player.direction = config.playerInitFacingDir;
 
-		// player data
-		// life
-		player.maxLife = playerTypeInfo.maxLife;
-		player.life = player.maxLife;
-		if(config.debug && config.debugPlayerUnlimitedHP){
-			player.maxLife = 999999;
-			player.life = 999999;
-		}
 		
-		// battle
-		player.gunOffsetX = playerTypeInfo.gunOffsetX;
-		player.gunOffsetY = playerTypeInfo.gunOffsetY;
 		
-		// timers
-		const c_frameToTime = 1000 / 24;
-		player.attackDuration = (playerTypeInfo.attackFrame+1) * c_frameToTime;
-		player.onhitDuration = (playerTypeInfo.onhitFrame+1) * c_frameToTime;
+		player.setPlayerType(type);
 
-		if(player.isLocalPlayer){
-			player.zapProtection = Cooldown.createNew(config.playerZapProtection);
-			player.shootCooldown = Cooldown.createNew(playerTypeInfo.shootCooldown, 0);
-			player.moveStepCooldown = Cooldown.createNew(playerTypeInfo.moveStepCooldown, 0);
-			player.respawnProtection = Cooldown.createNew(config.playerRespawnProtection);
-		}
-
-		// physics param
-		player.moveForceX = playerTypeInfo.moveForceX;
-		player.moveForceY = playerTypeInfo.moveForceY;
-		player.maxVelocityX = playerTypeInfo.maxVelocityX;
-		player.maxVelocityY = playerTypeInfo.maxVelocityY;
-
-		// misc
-		player.spriteName = playerTypeInfo.spriteName;
-		player.spriteScale = config.playerSpriteScale;
-		player.offsetX = playerTypeInfo.offsetX;
-		player.offsetY = playerTypeInfo.offsetY;
-		player.bulletType = playerTypeInfo.bulletType;
-		
-		// setup sprite
-		console.log("spriteName: " + player.spriteName);
-		var sprite = characterLoader.createCharacterSprite(x,y,player.spriteName);
-		player.sprite = sprite;
-		sprite.data.player = player;
-
-		sprite.scale.set(player.spriteScale);
-		sprite.anchor.set(playerTypeInfo.anchorX, playerTypeInfo.anchorY);
-
-		// setup physics
-		if(isLocalPlayer){			
-			// enable physics for localPlayer
-			game.physics.arcade.enableBody(sprite);
-			sprite.body.bounce.x = playerTypeInfo.bounceX;
-			sprite.body.bounce.y = playerTypeInfo.bounceY;
-			sprite.body.gravity.y = playerTypeInfo.gravity;
-			sprite.body.drag.setTo(playerTypeInfo.drag);
-			sprite.body.collideWorldBounds = true;
-			sprite.body.immovable = false;
-
-
-		}else{
-			// add to collision group
-			Game.nonLocalPlayerGroup.add(sprite);
-
-			// disable physics for nonLocalPlayer
-			sprite.body.immovable = true;
-		}
-
-		// setup hitBox	
-		if(playerTypeInfo.useCustomHitBox){
-			sprite.body.setSize(playerTypeInfo.hitBoxWidth, playerTypeInfo.hitBoxHeight, 
-				playerTypeInfo.hitBoxOfffsetX, playerTypeInfo.hitBoxOfffsetY);
-		}
-		
 		// getters
 		Object.defineProperty(player, "x", {
 			get: function() { return this.sprite.x; },
@@ -140,17 +177,11 @@ var Player = {
 		player.playerfsm = PlayerFSM.createNew(player);
 		player.playerfsm.init();
 
-		// lifebar
-		player.lifeBar = LifeBar.createNew(player);
-
-		// position synchronizer
-		player.posSync = 
-			networking.SpritePosSynchronizer.createNew(
-				player.sprite);
-
+		
 // --------------------------------------------
 // Operations
 // --------------------------------------------
+
 		// make the player sprite face the right direction
 		// can be called on both localplayer and nonlocal player
 		player.face = function(){			
@@ -253,6 +284,7 @@ var Player = {
 				// if player's life is zero, it will die when entering idle state
 				console.log('take damage: ', damage, ', type: ', onHitType);
 
+				player.lastHitSourceID = sourceID;
 				// record the killing blow
 				if(player.life <= damage){
 					player.killerID = sourceID;
@@ -272,6 +304,26 @@ var Player = {
 				player.takeDamage(player.id, player.id, 10, "zaphit", player.x, player.y);
 				player.sprite.body.velocity.setTo(0);
 			}
+		}
+
+		// localplayer only
+		player.jelly = function(jelly){
+			if(player.sprite.body.touching.left)
+					player.sprite.body.velocity.x += config.playerJellyVelocity;
+			else if(player.sprite.body.touching.right)
+					player.sprite.body.velocity.x += -config.playerJellyVelocity;				
+			else if(player.sprite.body.touching.down)
+					player.sprite.body.velocity.y += -config.playerJellyVelocity;
+			else if(player.sprite.body.touching.up)
+					player.sprite.body.velocity.y += config.playerJellyVelocity;
+			player.moveStepCooldown.set(config.playerJellyMoveCooldown);
+		}
+
+		// local player only
+		player.drown = function(){
+			if(player.life > 0)
+				// use previous killerID
+				player.takeDamage(player.lastHitSourceID, player.id, 999999, "zaphit", player.x, player.y);
 		}
 
 		player.die = function(killerID){
@@ -310,6 +362,8 @@ var Player = {
 			player.life = player.maxLife;
 			player.x = x;
 			player.y = y;
+			player.sprite.body.velocity.setTo(0, 0);
+			player.lastHitSourceID = player.id;
 			
 			if(player.lifeBar)
 				player.lifeBar.reset();
@@ -322,12 +376,12 @@ var Player = {
 				// respawn protection
 				player.respawnProtection.reset();
 				player.respawnProtectionFlicker();
+
+				// camera fade to normal
+				game.camera.flash("#000000", 500, true, config.cameraDeadScreenAlpha);
 			}else{
 				player.posSync.reset(x, y);
-			}
-
-			// camera fade to normal
-			game.camera.flash("#000000", 500, true, config.cameraDeadScreenAlpha);
+			}		
 		};
 
 		// register network update
@@ -408,7 +462,19 @@ var Player = {
 				var hitZaps = game.physics.arcade.overlap(player.sprite, Game.level.zapGroup, function(p1, p2){
 					player.zap();
 				});
+				var hitJelly = game.physics.arcade.collide(player.sprite, Game.level.jellyGroup, function(p1, p2){
+					player.jelly(p2);
+				});
+				var hitWater = game.physics.arcade.overlap(player.sprite, Game.level.waterGroup, function(p1, p2){
+					player.drown();
+				});
 				
+				// clamp fall velocity
+				var v = player.sprite.body.velocity;
+				// v.x = game.math.clamp(v.x, -player.maxVelocityX, player.maxVelocityX);
+				v.y = game.math.min(v.y, v.y, player.maxVelocityY * 2);
+
+
 				// update timers and cooldowns
 				player.moveStepCooldown.tick();
 				player.zapProtection.tick();
@@ -491,7 +557,7 @@ var Player = {
 		player.onRespawnTimerRing = function(){
 			if(player.isAlive)
 				return;
-			player.respawn(Game.randomInt(100, 400), Game.randomInt(100, 400));
+			player.respawn(Game.randomInt(Game.width * 0.1, Game.width * 0.9), Game.randomInt(Game.height * 0.1, Game.height * 0.9));
 		}
 
 		// flicker when player respawns

@@ -5,7 +5,7 @@
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
-var io = require('socket.io').listen(server);
+var io = require('socket.io')(server);
 
 app.use('/css', express.static(__dirname + '/css'));
 app.use('/js', express.static(__dirname + '/js'));
@@ -22,6 +22,9 @@ server.listen(8081, function(){
 });
 
 var g_logLevel = 2;
+var playerIDSocketMap = {};
+var g_scoreToRank = {"0": 1, leaderID: -1};
+var g_startTime = Date.now();
 
 // --------------------------------------------
 // messages
@@ -31,19 +34,22 @@ io.on('connection', function(socket){
 	// ------------- login/logout -----------------------------
 	// login message
 	socket.on('newplayer', function(data){
+		// first player in the lobby
+		if(Object.keys(io.sockets.connected).length == 1)
+			g_startTime = Date.now();
+
 		// init player
 		socket.player = {
 			id: server.lastPlayerID++,
 			playerType: data.playerType,
 			playerName: data.playerName,
-			x: randomInt(100, 400),
-			y: randomInt(100, 400),
+			x: randomInt(100, 1000),
+			y: randomInt(100, 1000),
 			state: "idle",
 			kills: 0,
 			deaths: 0,
 		};
 		playerIDSocketMap[socket.player.id] = socket;
-		
 		socket.emit('allplayers', getAllPlayers(socket.player.id));
 		socket.broadcast.emit('newplayer', socket.player);
 		
@@ -72,7 +78,7 @@ io.on('connection', function(socket){
 
 		socket.on('playerState', function(data){
 			socket.player.state = data.state;
-			logs(2, data.id, data.state);
+			logs(1, data.id, data.state);
 			socket.broadcast.emit('playerState', data);
 		});
 
@@ -88,26 +94,39 @@ io.on('connection', function(socket){
 		});
 
 		socket.on('playerDie', function(data){
+			socket.broadcast.emit('playerDie', data);
+			
 			var victim = socket.player;
-			var killer = playerIDSocketMap[data.killerID] ? playerIDSocketMap[data.killerID].player : null;
+			var killerSocket = findSocket(data.killerID);
+			var killer = killerSocket ? killerSocket.player : null;
 
 			// update kd
 			if(data.playerID != data.killerID && killer){
-				kill.kills++;
+				killer.kills++;
+				killerSocket.emit('updateScore', killer);
 			}
-			if(data.victim){
-				kill.death++;
+			if(victim){
+				victim.deaths++;
+				socket.emit('updateScore', victim);
 			}
+			logs(3, 'player die', data.playerID, 'killer', data.killerID);
 
-			socket.broadcast.emit('playerDie', data);
-			logs(3, 'player die', data.playerID, 'killer', data.killerID)
-			
+			// update ranks
+			g_scoreToRank = getScoreToRank();
+			io.emit('updateRank', g_scoreToRank);
 		});
 
 		socket.on('playerRespawn', function(data){
 			socket.broadcast.emit('playerRespawn', data);
 			logs(3, 'player respawn', data.playerID);
 
+		});
+
+		socket.on('changePlayerType', function(data){
+			socket.player.playerType = data.playerType;
+			socket.player.x = data.x;
+			socket.player.y = data.y;
+			socket.broadcast.emit('changePlayerType', data);
 		});
 
 		// ------------- bullet -----------------------------
@@ -138,6 +157,16 @@ io.on('connection', function(socket){
 // helpers
 // --------------------------------------------
 
+// function checkHeartBeat(){
+// 	var currentTime = Date.now();
+// 	Object.keys(io.sockets.connected).forEach(function(socketID){
+// 		var lastHeartBeat = io.sockets.connected[socketID].lastHeartBeat;
+// 		if(currentTime - lastHeartBeat > heartBeatTimeOut){
+
+// 		}
+// 	})
+// }
+
 function getAllPlayers(newPlayerID){
 	var data = {};
 	var players = [];
@@ -149,11 +178,54 @@ function getAllPlayers(newPlayerID){
 	});
 
 	data.players = players;
-	data.newPlayerID = newPlayerID; 
+	data.newPlayerID = newPlayerID;
+	data.scoreToRank = g_scoreToRank;
+	data.startTime = g_startTime;
 	return data;
 }
 
-var playerIDSocketMap = {};
+function scoreCompareFunction(a, b){
+	return b - a;
+};
+
+// bucket sort the ranks
+function getScoreToRank(){
+	var scoreBucket = {};
+
+	Object.keys(io.sockets.connected).forEach(function(socketID){
+		var player = io.sockets.connected[socketID].player;
+		if(player){
+			var score = player.kills;
+			if(!scoreBucket[score]){
+				scoreBucket[score] = 0;
+			}
+			scoreBucket[score]++;
+		}
+	});
+
+	var scores = Object.keys(scoreBucket);
+	scores.sort(scoreCompareFunction);
+
+	var rank = 1;
+	var scoreToRank = {};
+	for(var i = 0; i < scores.length; i++){
+		var s = scores[i];
+		scoreToRank[s] = rank;
+		rank += scoreBucket[s];
+	}
+
+	scoreToRank.leaderScore = scores[0];
+	scoreToRank.leaderID = -1;
+	if(scores[0]){
+		Object.keys(io.sockets.connected).forEach(function(socketID){
+			var player = io.sockets.connected[socketID].player;
+			if(player && player.kills == scores[0])
+				scoreToRank.leaderID = player.id;
+		});
+	}
+	return scoreToRank;
+};
+
 function findSocket(playerID){
 	return playerIDSocketMap[playerID];
 }
