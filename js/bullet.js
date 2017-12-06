@@ -265,9 +265,7 @@ var Bullet = {
 			if(bullet.recoil){
 				bullet.player.sprite.body.velocity.x += (-bullet.direction * bullet.recoil);
 			}
-
 		}
-
 		return bullet;
 	}
 }

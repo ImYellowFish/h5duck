@@ -265,6 +265,7 @@ var Player = {
 				onHitType = "default";
 
 			var onHitData = config.onHitType[onHitType];
+			audio.play(onHitData.sound);
 			if(onHitData.handledByFsm){
 				// if onhit effect is handled by fsm, skip
 			}else{
@@ -292,7 +293,7 @@ var Player = {
 				player.life = Math.max(0, player.life - damage);
 				
 				player.events.lifeChange.dispatch(player.life);
-				player.playerfsm.onGetHit(onHitType);
+				player.playerfsm.onGetHit(onHitType); 
 			}
 		};
 
@@ -317,6 +318,8 @@ var Player = {
 			else if(player.sprite.body.touching.up)
 					player.sprite.body.velocity.y += config.playerJellyVelocity;
 			player.moveStepCooldown.set(config.playerJellyMoveCooldown);
+
+			jelly.animations.play('jelly', 12, false, false);
 		}
 
 		// local player only
@@ -333,6 +336,10 @@ var Player = {
 			player.life = 0;
 			player.isAlive = false;
 			console.log("player is dead: " + player.id);
+
+			// play hurt sound
+			if(player.isInView)
+				audio.play('quack');
 
 			if(player.isLocalPlayer){
 				// change state
@@ -422,8 +429,12 @@ var Player = {
 
 			// inform server if on local player
 			// local player controls the spawn
-			if(player.isLocalPlayer)
+			if(player.isLocalPlayer){
 				Game.sendCreateBullet(bullet);
+				
+				// play bullet sound
+				audio.play(bullet.bulletTypeInfo.firesound);
+			}
 
 		}
 

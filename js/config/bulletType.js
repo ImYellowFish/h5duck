@@ -4,35 +4,41 @@ config.onHitType = {
 		key: "default",
 		effect: "blasthit",
 		force: 0,
+		sound: "yellowHit",
 	},
 
 	blasthit: {
 		key: "blasthit",
 		effect: "blasthit",
 		force: 0,
+		sound: "yellowHit",
 	},
 
 	forkhit: {
 		key: "forkhit",
 		effect: "forkhit",
 		force: 0,
+		sound: "blackHit",
 	},
 
 	bladehit: {
 		key: "bladehit",
 		effect: "bladehit",
 		force: 0,
+		sound: "blueHit",
 	},
 
 	shotgunhit: {
 		key: "shotgunhit",
 		effect: "blasthit",
 		force: 400,
+		sound: "redHit",
 	},
 
 	zaphit: {
 		key: "zaphit",
 		handledByFsm: true,
+		sound: "zap",
 	},
 };
 
@@ -54,7 +60,7 @@ config.bulletType = {
 		loop: true,
 
 		// battle
-		damage : 20,
+		damage : 25,
 		penetrate : false,
 		duration : 4000,
 		recoil : 50,
@@ -79,6 +85,7 @@ config.bulletType = {
 
 		// effect
 		onHitType: "blasthit",
+		firesound: "yellowAttack",
 	},
 
 
@@ -122,6 +129,7 @@ config.bulletType = {
 
 		// effect
 		onHitType: "shotgunhit",
+		firesound: "redAttack",
 	},
 
 
@@ -143,7 +151,7 @@ config.bulletType = {
 
 		// battle
 		damage : 15,
-		penetrate : false,
+		penetrate : true,
 		duration : 5000,
 		friendlyFire : true,
 		recoil : 25,
@@ -166,6 +174,7 @@ config.bulletType = {
 
 		// effect
 		onHitType: "bladehit",
+		firesound: "blueAttack",
 	},
 
 
@@ -188,18 +197,18 @@ config.bulletType = {
 		loop: true,
 
 		// battle
-		damage : 20,
-		penetrate : false,
-		duration : 2000,
+		damage : 10,
+		penetrate : true,
+		duration : 200,
 		recoil : 0,
 
 		// physics
-		velocityX : 1000,
-		velocityY : -50,
-		gravity : 100,
+		velocityX : 700,
+		velocityY : 0,
+		gravity : 0,
 		drag : 0,
 		bounce : 0.2,
-		collideWithBlocks : true,
+		collideWithBlocks : false,
 
 		// hitBox
 		useCustomHitBox : true,
@@ -210,6 +219,7 @@ config.bulletType = {
 
 		// effect
 		onHitType: "forkhit",
+		firesound: "blackAttack",
 	},
 
 

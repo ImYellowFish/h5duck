@@ -61,6 +61,8 @@ var config = {
     cameraDeadScreenAlpha : 0.6,
 
     gameDurationInSeconds : 360,
+
+    gameAudioVolume : 1,
 // --------------------------------------------
 // Player
 // --------------------------------------------
@@ -91,7 +93,7 @@ var config = {
 	playerIdleMaxSpeed : 10,
 
 	// Invunlerable frames from zap after being zapped. (ms)
-	playerZapProtection : 2100,
+	playerZapProtection : 4000,
 
 	// player total disable duration after being zapped. (ms)
 	playerZapDuration : 2000,

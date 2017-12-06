@@ -1,6 +1,6 @@
-3. player leaderboard
-7. better map
-8. bullet init damage cooldown
+1. sound
+2. level optimize
+3. level drawcall optimize
 11. buff system
 12. boss system
 13. optimize bullet collision detection

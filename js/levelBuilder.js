@@ -3,9 +3,9 @@ var levelBuilder = {};
 // API
 // --------------------------------------------
 levelBuilder.preload = function(){
-	game.load.pack('level', 'assets/level/levelRes.json');
+	game.load.image('levelBg', 'assets/level/duckbg.png');
 	game.load.json('levelLayout', 'assets/level/levelLayout.json');
-	game.load.atlasJSONHash('zap', 'assets/level/zap.png', 'assets/level/zap.json');
+	game.load.atlasJSONHash('level', 'assets/level/level.png', 'assets/level/level.json');
 };
 
 levelBuilder.createLevel = function(){
@@ -65,9 +65,13 @@ levelBuilder.buildElement = function(elementData, group){
 		console.error("error when loading", element.key, ",data: ", elementData);
 		return;
 	}
+	
+	element.spriteKey = 'level';
+	element.frame = elementData.key + ".png";
 
 	if(rule && rule.keyOverride){
 		element.spriteKey = rule.keyOverride;
+		element.frame = rule.frame;
 	}
 
 	var scale = 1;
@@ -78,7 +82,7 @@ levelBuilder.buildElement = function(elementData, group){
 		elementData.x, 
 		elementData.y, 
 		element.spriteKey, 
-		rule.frame);	
+		element.frame);	
 	element.sprite.scale.setTo(elementData.scaleX * scale, elementData.scaleY * scale);
 	
 	if(elementData.angle)
@@ -123,6 +127,7 @@ levelBuilder.setupJellyElement = function(element){
 		// hack code to fix horizontal zap
 		element.sprite.body.setSize(100, 220, -95, 20);
 	}
+	element.sprite.animations.add('jelly', ["jelly0.png", "jelly1.png", "jelly2.png", "jelly0.png"], 12, false, false);	
 }
 
 levelBuilder.setupWaterElement = function(element){
@@ -133,7 +138,7 @@ levelBuilder.setupWaterElement = function(element){
 // rules
 // --------------------------------------------
 levelBuilder.rules = {
-	'duckbg' : {post: levelBuilder.setupBgElement, scale: 4},
+	'duckbg' : {keyOverride: 'levelBg', frame: null, post: levelBuilder.setupBgElement, scale: 4},
 
 	'block0': {post: levelBuilder.setupBlockElement},
 
@@ -143,11 +148,11 @@ levelBuilder.rules = {
 
 	'zapblock': {post: levelBuilder.setupBlockElement},
 	
-	'zap0': {keyOverride: 'zap', frame: 'zap0.png', post: levelBuilder.setupZapElement},
+	'zap0': {post: levelBuilder.setupZapElement},
 
-	'zap1': {keyOverride: 'zap', frame: 'zap0.png', post: levelBuilder.setupZapElement},
+	'zap1': {post: levelBuilder.setupZapElement},
 
-	'zap2': {keyOverride: 'zap', frame: 'zap0.png', post: levelBuilder.setupZapElement},
+	'zap2': {post: levelBuilder.setupZapElement},
 
 	'jelly0' : {post: levelBuilder.setupJellyElement},
 
@@ -155,6 +160,6 @@ levelBuilder.rules = {
 
 	'jelly2' : {post: levelBuilder.setupJellyElement},
 
-	'water' : {post: levelBuilder.setupWaterElement},
+	'water' : {scale: 2, post: levelBuilder.setupWaterElement},
 }
 

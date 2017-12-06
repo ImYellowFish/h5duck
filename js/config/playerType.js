@@ -31,7 +31,7 @@ config.playerType = {
 		bulletType : "shotgun",
 		attackFrame : 9,
 		onhitFrame : 10,
-		shootCooldown: 3000,
+		shootCooldown: 1500,
 		moveStepCooldown: 0,
 	},
      
@@ -73,7 +73,7 @@ config.playerType = {
 		bulletType : "missile",
 		attackFrame : 9,
 		onhitFrame : 10,
-		shootCooldown: 1500,
+		shootCooldown: 1000,
 		moveStepCooldown: 0,
 	},
       
@@ -89,9 +89,9 @@ config.playerType = {
 		anchorY : 0.5,
 		
 		// physics
-		moveForceX : 20,
+		moveForceX : 30,
 		moveForceY : -40,
-		maxVelocityX : 200,
+		maxVelocityX : 300,
 		maxVelocityY : 200,
 		gravity : 300,
 		drag : 0,
@@ -147,14 +147,14 @@ config.playerType = {
 		
 		// shoot position
 		gunOffsetX : 70,
-		gunOffsetY : -30,
+		gunOffsetY : -10,
 
 		// battle
 		maxLife : 90,
 		bulletType : "fork",
 		attackFrame : 9,
 		onhitFrame : 10,
-		shootCooldown: 3000,
+		shootCooldown: 300,
 		moveStepCooldown: 0,
 	},
 

@@ -26,7 +26,12 @@ Game.preload = function(){
 
 	// load bullets
 	characterLoader.preloadSpriteSheet("bullet", "bullet");
+
+	// load fx
 	effect.preload();
+	audio.preload();
+
+	// load level
 	levelBuilder.preload();
 	UI.preload();
 
@@ -64,10 +69,13 @@ Game.create = function(){
 	Client.askNewPlayer(playerType, Game.localPlayerName);
 	networking.create();
 
+	audio.create();
+
 	// characterLoader.testAnimation();
 	// effect.test();
 	// Game.testZap();
 	// Game.testDie();
+	audio.test();
 }
 
 Game.update = function(){
