@@ -1,5 +1,15 @@
 var PreGame = {};
 
+// --------------------------------------------
+// Loading
+// --------------------------------------------
+
+
+
+// --------------------------------------------
+// Lifecycle
+// --------------------------------------------
+
 PreGame.preload = function() {
 	game.load.atlasJSONHash('ui', 'assets/sprites/ui.png', 'assets/sprites/ui.json');
 }

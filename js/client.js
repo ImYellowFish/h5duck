@@ -100,6 +100,9 @@ Client.socket.on('remove', function(id){
 	Game.removePlayer(id);
 });
 
+Client.socket.on('serverBusy', function(){
+	Game.onServerBusy();
+});
 
 // ---------- player ---------------------------
 Client.socket.on('move', function(data){

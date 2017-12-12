@@ -38,6 +38,18 @@ Game.preload = function(){
 	if(config.debugFPS)
 		game.time.advancedTiming = true;
 
+	// show loading progress
+	var loadProgress = game.add.text(45, 40, "loading", 
+		{font: '36px Arial', align: 'left', fill: "#FFFFFF", fontStyle: "italic"});
+	loadProgress.fixedToCamera = true;
+
+	game.load.onFileComplete.add(function(progress, key, success, loadedFiles, totalFiles){
+		loadProgress.text = "loading: " + progress + "%";
+		if(loadedFiles == totalFiles)
+			loadProgress.destroy();		
+	});
+
+	
 }
 
 Game.create = function(){
@@ -135,6 +147,11 @@ Game.setReady = function(){
 
 	// init UI here so UI has the highest draw order.
 	UI.create();
+}
+
+Game.onServerBusy = function(){
+	game.add.text(45, 100, "Server is busy. Please try again later.", 
+		{font: '48px Arial', align: 'left', fill: "#FFFFFF", fontStyle: "italic"});
 }
 
 

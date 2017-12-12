@@ -25,6 +25,7 @@ var g_logLevel = 2;
 var playerIDSocketMap = {};
 var g_scoreToRank = {"0": 1, leaderID: -1};
 var g_startTime = Date.now();
+var g_maxPlayers = 15;
 
 // --------------------------------------------
 // messages
@@ -34,8 +35,17 @@ io.on('connection', function(socket){
 	// ------------- login/logout -----------------------------
 	// login message
 	socket.on('newplayer', function(data){
-		// first player in the lobby
-		if(Object.keys(io.sockets.connected).length == 1)
+		var playerCount = Object.keys(io.sockets.connected).length;
+
+		// limit the max number of players
+		if(playerCount > g_maxPlayers){
+			socket.emit('serverBusy');
+			socket.disconnect(true);
+			return;
+		}
+
+		// if first two players in the lobby, reset timer
+		if(playerCount <= 2)
 			g_startTime = Date.now();
 
 		// init player
