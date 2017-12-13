@@ -17,7 +17,7 @@ config.onHitType = {
 	forkhit: {
 		key: "forkhit",
 		effect: "forkhit",
-		force: 0,
+		force: 50,
 		sound: "blackHit",
 	},
 
@@ -199,8 +199,8 @@ config.bulletType = {
 		// battle
 		damage : 10,
 		penetrate : true,
-		duration : 200,
-		recoil : 0,
+		duration : 150,
+		recoil : 50,
 
 		// physics
 		velocityX : 700,
@@ -212,7 +212,7 @@ config.bulletType = {
 
 		// hitBox
 		useCustomHitBox : true,
-		hitBoxWidth : 70,
+		hitBoxWidth : 200,
 		hitBoxHeight : 40,
 		hitBoxOfffsetX : 50,
 		hitBoxOfffsetY : 25,

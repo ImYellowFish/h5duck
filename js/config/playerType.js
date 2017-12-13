@@ -133,7 +133,7 @@ config.playerType = {
 		moveForceY : -30,
 		maxVelocityX : 160,
 		maxVelocityY : 160,
-		gravity : 300,
+		gravity : 500,
 		drag : 0,
 		bounceX : 0.2,
 		bounceY : 0.2,
@@ -154,7 +154,7 @@ config.playerType = {
 		bulletType : "fork",
 		attackFrame : 9,
 		onhitFrame : 10,
-		shootCooldown: 300,
+		shootCooldown: 200,
 		moveStepCooldown: 0,
 	},
 
